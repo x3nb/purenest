@@ -1,0 +1,258 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HollowNest — Personal Desktop Prototype</title>
+<style>
+:root{
+  --bg:#070b10; --panel:rgba(11,17,24,.88); --panel2:rgba(16,24,32,.94);
+  --ink:#e9f2f5; --muted:#93a6af; --glow:#bfe8ef; --line:rgba(190,220,230,.15);
+  --accent:#9bd9e3; --danger:#d99a9a;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  font-family:Georgia,"Times New Roman",serif; color:var(--ink); background:#05080c;
+  overflow:hidden;
+}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+#scene{
+  position:fixed; inset:0; overflow:hidden;
+  background:
+    radial-gradient(ellipse at 50% 30%,rgba(100,142,160,.13),transparent 35%),
+    radial-gradient(ellipse at 20% 80%,rgba(68,102,89,.14),transparent 35%),
+    linear-gradient(#060a0f 0%,#0b1118 48%,#05080c 100%);
+}
+#scene:before{
+  content:""; position:absolute; inset:0; opacity:.45;
+  background:
+    radial-gradient(circle at 20% 30%,#d5f7ff 0 1px,transparent 2px),
+    radial-gradient(circle at 75% 25%,#d5f7ff 0 1px,transparent 2px),
+    radial-gradient(circle at 60% 70%,#bceaf0 0 1px,transparent 2px);
+  background-size:310px 260px,420px 340px,260px 320px;
+  animation:drift 24s linear infinite;
+}
+@keyframes drift{to{transform:translate3d(30px,20px,0)}}
+.ruin{position:absolute;bottom:-8vh;left:-5vw;width:110vw;height:38vh;opacity:.65;
+  background:linear-gradient(160deg,transparent 20%,#101820 21% 34%,transparent 35%),
+             linear-gradient(200deg,transparent 45%,#0c141b 46% 72%,transparent 73%);
+  filter:blur(1px);
+}
+.lamp{position:absolute;width:10px;height:10px;border-radius:50%;background:#d9f4f0;box-shadow:0 0 18px 7px rgba(180,235,230,.45)}
+.l1{left:13%;top:24%}.l2{right:17%;top:31%}.l3{left:42%;bottom:17%}
+#app{position:relative;height:100%;display:grid;grid-template-columns:245px 1fr 330px;gap:18px;padding:22px}
+.glass{background:var(--panel);border:1px solid var(--line);box-shadow:0 18px 60px rgba(0,0,0,.38);backdrop-filter:blur(12px)}
+aside,.right{border-radius:22px;padding:18px;overflow:hidden}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.mask{width:40px;height:40px;border-radius:50% 50% 44% 44%;background:linear-gradient(#e9f5f5,#a7c3c8);box-shadow:0 0 20px rgba(190,230,235,.2);position:relative}
+.mask:after{content:"";position:absolute;left:8px;right:8px;bottom:8px;height:8px;border-radius:50%;background:#17242a}
+.brand h1{font-size:21px;margin:0;letter-spacing:.08em}
+.brand small{color:var(--muted)}
+nav{display:grid;gap:8px}
+.navbtn{background:transparent;border:1px solid transparent;color:#b8c9ce;text-align:left;padding:11px 12px;border-radius:12px;transition:.2s}
+.navbtn:hover,.navbtn.active{background:rgba(160,215,225,.08);border-color:var(--line);color:white}
+.quote{position:absolute;bottom:24px;left:18px;right:18px;color:#738890;font-size:12px;line-height:1.5}
+.center{min-width:0;display:flex;flex-direction:column;gap:14px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-radius:18px}
+.clock{color:var(--muted);font-size:13px}
+.hero{min-height:215px;border-radius:22px;padding:28px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-90px;bottom:-130px;width:360px;height:360px;border-radius:50%;border:1px solid rgba(190,230,235,.15);box-shadow:0 0 70px rgba(150,220,225,.07)}
+.kicker{text-transform:uppercase;letter-spacing:.22em;color:#88aab3;font-size:11px}
+.hero h2{font-size:39px;font-weight:normal;margin:12px 0 8px;max-width:600px}
+.hero p{color:#9eafb6;max-width:590px;line-height:1.6}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tile{border-radius:17px;padding:17px;min-height:92px;position:relative;transition:.2s}
+.tile:hover{transform:translateY(-2px);border-color:rgba(190,230,235,.28)}
+.tile .symbol{font-size:21px;color:#bfe8ef}
+.tile b{display:block;margin-top:10px;font-size:14px}
+.tile span{font-size:11px;color:var(--muted)}
+.feed{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;min-height:0}
+.card{border-radius:18px;padding:17px;min-width:0}
+.card h3{margin:0 0 12px;font-size:15px;font-weight:normal;letter-spacing:.08em}
+.news{display:grid;gap:10px}
+.newsitem{padding:11px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid transparent}
+.newsitem:hover{border-color:var(--line)}
+.newsitem b{font-size:12px}.newsitem small{display:block;color:#74878e;margin-top:5px}
+.right{display:flex;flex-direction:column;min-height:0}
+.right h3{font-weight:normal;margin:2px 0 14px;letter-spacing:.1em}
+.friendlist{display:grid;gap:8px;overflow:auto;padding-right:2px}
+.friend{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:9px;border-radius:14px;background:rgba(255,255,255,.025);border:1px solid transparent}
+.friend:hover,.friend.selected{border-color:var(--line);background:rgba(150,220,225,.06)}
+.avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:16px;font-weight:bold;color:#dceff1;background:radial-gradient(circle at 35% 30%,#a9d3d7,#293b42 58%,#11191e);box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+.friendname{font-size:13px}.statusline{font-size:10px;color:#71858c;margin-top:4px}
+.dot{width:7px;height:7px;border-radius:50%;background:#77949b;align-self:start;margin-top:4px}.online .dot{background:#a8d8cf;box-shadow:0 0 8px #a8d8cf}
+.chatbox{margin-top:auto;border-top:1px solid var(--line);padding-top:14px}
+.chatlog{height:150px;overflow:auto;display:grid;align-content:start;gap:7px;padding-right:4px}
+.msg{font-size:11px;line-height:1.4;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.04);max-width:88%}
+.msg.me{margin-left:auto;background:rgba(150,220,225,.09)}
+.msg small{display:block;color:#71858c;margin-top:3px}
+.chatrow{display:flex;gap:7px;margin-top:8px}
+.chatrow input,.modal input,.modal textarea{width:100%;background:#080e13;color:white;border:1px solid var(--line);border-radius:10px;padding:10px;outline:none}
+.iconbtn,.send{border:1px solid var(--line);background:rgba(150,220,225,.07);color:#d9eff1;border-radius:10px;padding:0 12px}
+.statuscard{display:none}
+#login{position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:rgba(3,6,9,.82);backdrop-filter:blur(10px)}
+.modal{width:min(420px,calc(100vw - 34px));padding:28px;border-radius:22px}
+.modal h2{font-weight:normal;margin:0 0 7px;font-size:30px}.modal p{color:var(--muted);font-size:13px;line-height:1.5}
+.form{display:grid;gap:10px;margin-top:18px}.primary{padding:11px;border:1px solid rgba(180,230,235,.25);border-radius:11px;background:rgba(160,220,225,.12);color:#e9f6f7}
+.link{background:none;border:0;color:#9fcbd1;padding:8px 0;text-align:left;font-size:12px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 16px;border:1px solid var(--line);background:#101920ee;border-radius:12px;color:#cce8eb;opacity:0;pointer-events:none;transition:.25s;z-index:30}
+#toast.show{opacity:1}
+.overlay{position:fixed;inset:0;z-index:20;display:none;place-items:center;background:rgba(3,6,9,.72);backdrop-filter:blur(8px)}
+.overlay .card{width:min(600px,calc(100vw - 30px));max-height:80vh;overflow:auto}
+@media(max-width:1050px){#app{grid-template-columns:190px 1fr}.right{display:none}.tiles{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){body{overflow:auto}#app{height:auto;min-height:100%;grid-template-columns:1fr;padding:10px}.left{display:none}.hero h2{font-size:30px}.feed{grid-template-columns:1fr}.right{display:flex}.right{min-height:480px}}
+</style>
+</head>
+<body>
+<div id="scene"><div class="ruin"></div><div class="lamp l1"></div><div class="lamp l2"></div><div class="lamp l3"></div></div>
+
+<div id="login">
+  <div class="modal glass">
+    <div class="kicker">A quiet place beneath the earth</div>
+    <h2>Welcome to HollowNest</h2>
+    <p>This prototype uses local demo authentication. The next build can replace it with your Supabase project.</p>
+    <div class="form">
+      <input id="loginName" placeholder="Name or email" autocomplete="username">
+      <input id="loginPass" placeholder="Password" type="password" autocomplete="current-password">
+      <button class="primary" onclick="enterNest()">Enter HollowNest</button>
+      <button class="link" onclick="recover()">Forgot your password?</button>
+    </div>
+    <p id="authNote"></p>
+  </div>
+</div>
+
+<div id="app">
+  <aside class="glass left">
+    <div class="brand"><div class="mask"></div><div><h1>HollowNest</h1><small>your little corner</small></div></div>
+    <nav>
+      <button class="navbtn active" onclick="showToast('You are already home.')">⌂ &nbsp; Home</button>
+      <button class="navbtn" onclick="openSite('https://www.youtube.com/')">◉ &nbsp; YouTube</button>
+      <button class="navbtn" onclick="openSite('https://www.tumblr.com/')">✦ &nbsp; Tumblr</button>
+      <button class="navbtn" onclick="openSite('https://www.instagram.com/')">◎ &nbsp; Instagram</button>
+      <button class="navbtn" onclick="newsModal()">✧ &nbsp; Animation News</button>
+      <button class="navbtn" onclick="toggleSound()">♫ &nbsp; Soundtrack</button>
+      <button class="navbtn" onclick="statusModal()">✎ &nbsp; My Status</button>
+      <button class="navbtn" onclick="settingsModal()">⚙ &nbsp; Settings</button>
+    </nav>
+    <div class="quote">“No cost too great.”<br><span>— atmosphere placeholder</span></div>
+  </aside>
+
+  <main class="center">
+    <div class="glass topbar"><div class="kicker">HALLownest / private desktop</div><div class="clock" id="clock"></div></div>
+    <section class="glass hero">
+      <div class="kicker">Good evening, wanderer.</div>
+      <h2 id="welcome">The lanterns are waiting.</h2>
+      <p>Your personal corner for music, friends, animation news, and the places you visit most. Everything here is a prototype — the quiet foundation for your finished HollowNest.</p>
+    </section>
+
+    <section class="tiles">
+      <button class="glass tile" onclick="openSite('https://www.youtube.com/')"><div class="symbol">◉</div><b>YouTube</b><span>watch & wander</span></button>
+      <button class="glass tile" onclick="openSite('https://www.tumblr.com/')"><div class="symbol">✦</div><b>Tumblr</b><span>quiet discoveries</span></button>
+      <button class="glass tile" onclick="openSite('https://www.instagram.com/')"><div class="symbol">◎</div><b>Instagram</b><span>people & places</span></button>
+      <button class="glass tile" onclick="newsModal()"><div class="symbol">✧</div><b>Animation News</b><span>latest stories</span></button>
+    </section>
+
+    <section class="feed">
+      <div class="glass card">
+        <h3>NOTICE BOARD</h3>
+        <div class="news">
+          <div class="newsitem"><b>Animation news will live here</b><small>Connect a news/RSS source in the next build.</small></div>
+          <div class="newsitem"><b>Your status can appear here</b><small>Post something for your eight friends to see.</small></div>
+          <div class="newsitem"><b>Supabase is ready to be connected</b><small>Authentication, realtime chat and profiles are planned.</small></div>
+        </div>
+      </div>
+      <div class="glass card">
+        <h3>MY STATUS</h3>
+        <div id="statusView" style="color:#a9b8bd;font-size:13px;line-height:1.6">The kingdom is quiet tonight.</div>
+        <button class="link" onclick="statusModal()">Change status →</button>
+      </div>
+    </section>
+  </main>
+
+  <aside class="glass right">
+    <h3>YOUR EIGHT</h3>
+    <div class="friendlist" id="friendlist"></div>
+    <div class="chatbox">
+      <div style="font-size:11px;color:#7d9198;margin-bottom:7px">CHAT WITH <span id="chatWith">Moth</span></div>
+      <div class="chatlog" id="chatlog"></div>
+      <div class="chatrow"><input id="chatInput" placeholder="leave a little message…" onkeydown="if(event.key==='Enter')sendMessage()"><button class="send" onclick="sendMessage()">↗</button></div>
+    </div>
+  </aside>
+</div>
+
+<div id="overlay" class="overlay" onclick="if(event.target===this)closeOverlay()"><div class="glass card" id="overlayCard"></div></div>
+<div id="toast"></div>
+
+<script>
+const friends=[
+ {name:"Moth",avatar:"M",online:true},{name:"Quill",avatar:"Q",online:true},{name:"Lumen",avatar:"L",online:false},
+ {name:"Wisp",avatar:"W",online:true},{name:"Moss",avatar:"M",online:false},{name:"Bell",avatar:"B",online:true},
+ {name:"Nail",avatar:"N",online:false},{name:"Stag",avatar:"S",online:true}
+];
+let selected=0, messages={0:[["Moth","The lanterns look lovely tonight.",false],["You","I finally got the little desktop working.",true]]};
+let audioCtx=null, master=null, soundOn=false;
+
+function enterNest(){
+ const n=document.getElementById('loginName').value.trim();
+ if(!n){document.getElementById('authNote').textContent="Please enter your name.";return}
+ localStorage.setItem('hollownest_demo_user',n);
+ document.getElementById('login').style.display='none';
+ document.getElementById('welcome').textContent=`Welcome, ${n}.`;
+ startAmbient();
+ showToast("Welcome home.");
+}
+function recover(){
+ document.getElementById('authNote').textContent="Prototype: a real build will send a secure Supabase password-reset email here.";
+}
+function renderFriends(){
+ document.getElementById('friendlist').innerHTML=friends.map((f,i)=>`
+ <button class="friend ${i===selected?'selected':''} ${f.online?'online':''}" onclick="selectFriend(${i})">
+  <div class="avatar">${f.avatar}</div><div><div class="friendname">${f.name}</div><div class="statusline">${f.online?'online':'away'}</div></div><div class="dot"></div>
+ </button>`).join('');
+}
+function selectFriend(i){selected=i;document.getElementById('chatWith').textContent=friends[i].name;renderFriends();renderChat()}
+function renderChat(){
+ const arr=messages[selected]||[];
+ document.getElementById('chatlog').innerHTML=arr.map(m=>`<div class="msg ${m[2]?'me':''}"><b>${m[2]?'You':m[0]}</b><br>${escapeHtml(m[1])}<small>now</small></div>`).join('');
+ const el=document.getElementById('chatlog');el.scrollTop=el.scrollHeight;
+}
+function sendMessage(){
+ const input=document.getElementById('chatInput'), v=input.value.trim(); if(!v)return;
+ (messages[selected]??=[]).push(["You",v,true]); input.value=""; renderChat();
+ setTimeout(()=>{ if(Math.random()>.35){(messages[selected]??=[]).push([friends[selected].name,"The message reached me through the tunnels. ✦",false]);renderChat()} },650);
+}
+function statusModal(){
+ openOverlay(`<h3>MY STATUS</h3><p style="color:#82969d">Write a small note for your friends.</p><textarea id="statusInput" rows="5" placeholder="What is happening in your little corner?">${escapeHtml(document.getElementById('statusView').textContent)}</textarea><br><button class="primary" style="margin-top:10px" onclick="saveStatus()">Post status</button>`);
+}
+function saveStatus(){const v=document.getElementById('statusInput').value.trim();if(v){document.getElementById('statusView').textContent=v;localStorage.setItem('hollownest_status',v)}closeOverlay();showToast("Status posted.");}
+function newsModal(){openOverlay(`<h3>ANIMATION NEWS</h3><p style="color:#82969d">The finished version can connect this panel to an RSS/news service so the stories stay current.</p><div class="newsitem"><b>News source placeholder</b><small>Choose your preferred animation news sources during the next build.</small></div><button class="primary" style="margin-top:12px" onclick="closeOverlay()">Return to HollowNest</button>`)}
+function settingsModal(){openOverlay(`<h3>SETTINGS</h3><p style="color:#82969d">Prototype settings</p><button class="primary" onclick="toggleSound();closeOverlay()">Toggle ambient soundtrack</button><br><button class="link" onclick="localStorage.clear();location.reload()">Reset local prototype</button>`)}
+function openOverlay(html){document.getElementById('overlayCard').innerHTML=html;document.getElementById('overlay').style.display='grid'}
+function closeOverlay(){document.getElementById('overlay').style.display='none'}
+function openSite(url){window.open(url,'_blank','noopener,noreferrer')}
+function showToast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function updateClock(){document.getElementById('clock').textContent=new Date().toLocaleString([], {weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}
+function startAmbient(){
+ if(soundOn)return;
+ try{
+  audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  master=master||audioCtx.createGain(); master.gain.value=.035; master.connect(audioCtx.destination);
+  const notes=[110,146.83,164.81,220];
+  notes.forEach((freq,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=freq;g.gain.value=.0;o.connect(g);g.connect(master);o.start();g.gain.linearRampToValueAtTime(.18,audioCtx.currentTime+2+i);setInterval(()=>{g.gain.cancelScheduledValues(audioCtx.currentTime);g.gain.linearRampToValueAtTime(.04,audioCtx.currentTime+1);g.gain.linearRampToValueAtTime(.15,audioCtx.currentTime+5)},7000+i*900)});
+  soundOn=true;showToast("Ambient soundtrack enabled.");
+ }catch(e){showToast("Sound needs a browser interaction first.")}
+}
+function toggleSound(){if(!soundOn)startAmbient();else{master.gain.value=0;soundOn=false;showToast("Soundtrack muted.")}}
+(function init(){
+ const u=localStorage.getItem('hollownest_demo_user'); if(u){document.getElementById('loginName').value=u;document.getElementById('login').style.display='none';document.getElementById('welcome').textContent=`Welcome back, ${u}.`}
+ const s=localStorage.getItem('hollownest_status');if(s)document.getElementById('statusView').textContent=s;
+ renderFriends();renderChat();updateClock();setInterval(updateClock,30000);
+})();
+</script>
+</body>
+</html>
