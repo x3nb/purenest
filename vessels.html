@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>socialdreamr</title>
+<title>puresnest</title>
 <link rel="icon" type="image/png" href="https://user.uploads.dev/file/40b40aab9ac1fe6236423c677f4edb71.png">
 <link rel="apple-touch-icon" href="https://user.uploads.dev/file/40b40aab9ac1fe6236423c677f4edb71.png">
 <meta name="theme-color" content="#060a14">
@@ -123,7 +123,7 @@ button:hover{transform:translateY(-2px);background:rgba(123,44,255,.28);filter:n
     <input id="sdFile" type="file" accept="audio/mpeg,audio/mp3,.mp3,image/png,image/jpeg,image/gif,image/webp" hidden>
   </div>
   <footer class="sdFine">
-    &copy; <span id="sdYear">2026</span> cafedreamr. all rights reserved.<br>
+    &copy; <span id="sdYear">2026</span> puresnest. all rights reserved.<br>
     18+ only. by entering you confirm you are of legal age where you live.<br>
     this room is provided as-is, no warranties. you own what you post and you are responsible for it. don't upload anything you don't have the right to share. mods may remove anything at any time.
   </footer>
@@ -133,17 +133,12 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const FLOAT_IMG = "float.jpg";
 const BG_VIDEO = "milo.mp4";
-const BG_VIDEO2 = "https://user.uploads.dev/file/f653d6460d65ac1b00035daf23504f77.mp4";
-const BG_MUSIC = "https://user.uploads.dev/file/589a939a0764a9c70d834861836e3d55.mp3";
+const BG_VIDEO2 = ".mp4";
+const BG_MUSIC = ".mp3";
 const TUNES = [
-  {t: "cafedreamr lounge", u: "https://user.uploads.dev/file/589a939a0764a9c70d834861836e3d55.mp3", f: "cafedreamr-lounge.mp3"},
-  {t: "staying grounded, in christ", u: "https://user.uploads.dev/file/0e8cbd6a7d96bc86b14dd93432c0ef6a.mp3", f: "staying-grounded-in-christ.mp3"},
+  {t: "lounge", u: "https://user.uploads.dev/file/589a939a0764a9c70d834861836e3d55.mp3", f: "cafedreamr-lounge.mp3"},
   {t: "bat whispers (instrumental)", u: "https://user.uploads.dev/file/a95b7ff1490583727a873f9e9be21703.mp3", f: "bat-whispers-instrumental.mp3"},
   {t: "staying grounded (instrumental)", u: "https://user.uploads.dev/file/605216f376218bfff8742ee30576501d.mp3", f: "staying-grounded-instrumental.mp3"},
-  {t: "live for christ (slay & sylvestre)", u: "https://user.uploads.dev/file/be53fb7f7baceefdacf90affb10a0b84.mp3", f: "slay-sylvestre-live-for-christ.mp3"},
-  {t: "fruits of the spirit (slay & sylvestre)", u: "https://user.uploads.dev/file/cb1c6a60e6c8f219d93259757ce328de.mp3", f: "slay-sylvestre-fruits-of-the-spirit.mp3"},
-  {t: "saved along the walk (miki)", u: "https://user.uploads.dev/file/82c83327ded3a1e2117308fbf888054c.mp3", f: "miki-saved-along-the-walk.mp3"},
-  {t: "saved along the walk, drums only (miki)", u: "https://user.uploads.dev/file/91f4bac4cf627e94b53ba3b1285c0499.mp3", f: "miki-saved-along-the-walk-drums.mp3"}
 ];
 const SUPABASE_URL = "https://xzhsscjdaffzldnqwpxl.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6aHNzY2pkYWZmemxkbnF3cHhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY3NTY0NzcsImV4cCI6MjEwMjMzMjQ3N30.dc7UFaby8qmFue6UNr2QodurIPFGQBtAMz1EmBizt5g";
