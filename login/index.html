@@ -38,7 +38,7 @@ nav{display:grid;gap:8px}
 .navbtn:hover,.navbtn.active{background:rgba(160,215,225,.08);border-color:var(--line);color:#fff;box-shadow:0 0 12px rgba(0,229,255,.18)}
 .quote{margin-top:auto;padding-top:14px;color:#738890;font-size:12px;line-height:1.5;font-style:italic;flex:none}
 .center{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;overflow:auto;padding-bottom:4px}
-.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex:none}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex:none;flex-wrap:wrap;gap:8px}
 .kicker{font-family:monospace;text-transform:uppercase;letter-spacing:.22em;color:#88aab3;font-size:11px}
 .clock{font-family:monospace;color:var(--muted);font-size:12px}
 .hero{padding:22px;flex:none}
@@ -74,7 +74,7 @@ nav{display:grid;gap:8px}
 .chatrow input,.modal input,.modal textarea,#echoInput{width:100%;background:#080e13;color:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;outline:none;font-family:monospace;font-size:12px}
 .send,.primary{border:1px solid rgba(180,230,235,.25);background:rgba(160,220,225,.12);color:#e9f6f7;border-radius:10px;padding:10px 14px}
 .link{background:none;border:0;color:#9fcbd1;font-size:12px;padding:8px 0;font-family:monospace}
-.echoes{margin-top:12px;border-top:1px solid var(--line);padding-top:12px;flex:none}
+.echoes{margin-top:16px;border-top:1px solid var(--line);padding-top:14px;flex:none}
 .echoList{display:grid;gap:7px;max-height:150px;overflow:auto;margin-bottom:8px}
 .echo{font-size:12px;background:rgba(125,249,255,.05);border:1px solid rgba(125,249,255,.1);border-radius:10px;padding:8px 10px}
 .echo small{display:block;color:var(--muted);font-family:monospace;font-size:10px;margin-top:3px}
@@ -92,7 +92,7 @@ nav{display:grid;gap:8px}
 .holoCtl button{background:rgba(125,249,255,.08);border:1px solid var(--line);color:var(--holo);border-radius:8px;padding:4px 10px;font-family:monospace;font-size:11px}
 body.flat .holo:before,body.flat .flick,body.flat .holo:after{display:none}
 body.flat .gridfloor,body.flat .beam{opacity:.08}
-@media(max-width:1050px){#app{grid-template-columns:190px 1fr}.left{grid-column:1}.right{grid-column:2}.center{grid-column:2}.tiles{grid-template-columns:repeat(2,1fr)}.friendlist{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1050px){body{overflow:auto}#app{grid-template-columns:190px 1fr;height:auto;min-height:100vh}.left{grid-column:1}.right{grid-column:2}.center{grid-column:2}.tiles{grid-template-columns:repeat(2,1fr)}.friendlist{grid-template-columns:repeat(2,1fr)}.chatlog{min-height:260px;max-height:60vh}}
 @media(max-width:720px){body{overflow:auto}#app{height:auto;min-height:100vh;grid-template-columns:1fr}.left{display:none}.center,.right{grid-column:1}.chatlog{min-height:340px;max-height:none}}
 </style>
 <style>
