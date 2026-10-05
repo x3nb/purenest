@@ -1,0 +1,610 @@
+<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>HollowNest</title></head><body>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b1118'/><g transform='rotate(38 32 32)'><polygon points='32,5 37,30 37,44 27,44 27,30' fill='%23cfd9dd'/><polygon points='32,5 34.5,30 34.5,44 29.5,44 29.5,30' fill='%23ffffff'/><rect x='24' y='44' width='16' height='4' rx='2' fill='%23aeb9be'/><rect x='29' y='48' width='6' height='11' rx='2.5' fill='%23343e44'/></g><path d='M47 8l1.7 4.6L53.5 14l-4.8 1.4L47 20l-1.7-4.6-4.8-1.4 4.8-1.4z' fill='%23ffffff'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --holo:#bfe8ef; --holo-bright:#7df9ff; --line:rgba(190,220,230,.15);
+  --panel:rgba(11,17,24,.88); --panel2:rgba(16,24,32,.94);
+  --ink:#708090; --muted:#93a6af;
+}
+*{box-sizing:border-box}
+body{text-align:left;background:#05080c;color:var(--ink);font-family:Georgia,serif;margin:0;overflow:hidden}
+button,input,textarea{font:inherit}
+#scene{position:fixed;inset:0;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,rgba(100,142,160,.13),transparent 35%),radial-gradient(ellipse at 20% 80%,rgba(68,102,89,.14),transparent 35%),linear-gradient(#060a0f 0%,#0b1118 48%,#05080c 100%)}
+#stars{position:absolute;inset:0;opacity:.7}
+.ruin{position:absolute;bottom:-8vh;left:-5vw;width:110vw;height:38vh;opacity:.65;background:linear-gradient(160deg,transparent 20%,#101820 21% 34%,transparent 35%),linear-gradient(200deg,transparent 45%,#0c141b 46% 72%,transparent 73%);filter:blur(1px)}
+.lamp{position:absolute;width:10px;height:10px;border-radius:50%;background:#d9f4f0;box-shadow:0 0 18px 7px rgba(180,235,230,.45)}
+.l1{left:13%;top:24%}.l2{right:17%;top:31%}.l3{left:42%;bottom:17%}
+.gridfloor{position:absolute;left:-20vw;right:-20vw;bottom:-6vh;height:30vh;background:repeating-linear-gradient(90deg,transparent 0 59px,rgba(125,249,255,.07) 59px 60px),repeating-linear-gradient(0deg,transparent 0 29px,rgba(125,249,255,.07) 29px 30px);transform:perspective(600px) rotateX(62deg);opacity:.28;mask-image:linear-gradient(transparent,#000 40%)}
+.beam{position:absolute;left:50%;top:0;width:60vw;height:95vh;transform:translateX(-50%);background:linear-gradient(rgba(125,249,255,.06),transparent 70%);clip-path:polygon(42% 0,58% 0,95% 100%,5% 100%);pointer-events:none}
+.scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.18) 3px 4px)}
+.flick{position:absolute;inset:0;pointer-events:none;background:rgba(125,249,255,.025);animation:flick 5s infinite steps(60)}
+@keyframes flick{0%,100%{opacity:.6}8%{opacity:.25}9%{opacity:.65}43%{opacity:.2}44%{opacity:.6}}
+#app{position:relative;height:100vh;min-height:0;overflow:hidden;display:grid;grid-template-columns:64px minmax(0,1.6fr) minmax(0,0.95fr);gap:22px;padding:20px}
+#app[hidden]{display:none!important}
+.left{grid-column:1}.right{grid-column:2}.center{grid-column:3}
+.holo{background:var(--panel);border:1px solid var(--line);box-shadow:0 18px 60px rgba(0,0,0,.38),0 0 18px rgba(0,229,255,.08),inset 0 0 30px rgba(0,229,255,.04);backdrop-filter:blur(12px);position:relative;overflow:hidden}
+.holo:before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(125,249,255,.045) 3px 4px)}
+.holo:after{display:none}
+@keyframes sweep{to{transform:translateY(130vh)}}
+aside,.topbar,.hero,.tile,.card{border-radius:18px}
+aside{padding:18px;display:flex;flex-direction:column;min-height:0;min-width:0;max-height:calc(100vh - 40px);overflow:hidden}
+.center{min-height:0;max-height:calc(100vh - 40px);overflow-y:auto}
+.chatCore{min-height:0}
+.chatbox{min-height:0}
+.left nav{overflow:auto;min-height:0}
+.clip{clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
+.brand{display:flex;gap:12px;align-items:center;margin-bottom:20px}
+.mask{width:42px;height:42px;border-radius:50%;background:radial-gradient(circle at 50% 35%,#232f36,#090f15 72%);border:2px solid rgba(200,215,220,.5);box-shadow:0 0 14px rgba(200,225,235,.25);position:relative;flex:none;overflow:hidden}
+.mask .dagger{position:absolute;left:50%;top:3px;width:15px;height:36px;transform:translateX(-50%) rotate(38deg);background:linear-gradient(90deg,#79878d,#f6fbfc 38%,#ffffff 50%,#dfe9ec 62%,#79878d),linear-gradient(180deg,transparent 0 68%,#39434a 68% 100%);clip-path:polygon(50% 0,74% 14%,74% 56%,97% 56%,97% 70%,74% 70%,72% 100%,28% 100%,26% 70%,3% 70%,3% 56%,26% 56%,26% 14%);filter:drop-shadow(0 0 3px rgba(255,255,255,.55))}
+.mask:before{content:"";position:absolute;top:-25%;bottom:-25%;width:11px;left:-40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.9),transparent);transform:rotate(20deg);animation:daggersweep 3.8s ease-in-out infinite;pointer-events:none}
+@keyframes daggersweep{0%,55%{left:-40%;opacity:0}72%{opacity:1}100%{left:135%;opacity:0}}
+.mask:after{content:"✦";position:absolute;right:3px;top:1px;font-size:11px;line-height:1;color:#fff;text-shadow:0 0 6px #fff,0 0 12px #9adcff;animation:blingtwinkle 2.4s ease-in-out infinite;pointer-events:none}
+@keyframes blingtwinkle{0%,100%{opacity:.15;transform:scale(.6) rotate(0deg)}50%{opacity:1;transform:scale(1.2) rotate(20deg)}}
+
+.brand h1{font-size:21px;margin:0;letter-spacing:.08em;font-weight:normal;text-shadow:0 0 12px rgba(125,249,255,.5)}
+.brand small{color:var(--muted);font-size:11px}
+nav{display:grid;gap:8px}
+.navbtn{background:transparent;border:1px solid transparent;color:#b8c9ce;text-align:left;padding:11px 12px;border-radius:12px;font-family:monospace;font-size:13px}
+.navbtn:hover,.navbtn.active{background:rgba(160,215,225,.08);border-color:var(--line);color:#fff;box-shadow:0 0 12px rgba(0,229,255,.18)}
+.quote{margin-top:auto;padding-top:14px;color:#738890;font-size:12px;line-height:1.5;font-style:italic;flex:none}
+.center{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;overflow:auto;padding-bottom:4px}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex:none;flex-wrap:wrap;gap:8px}
+.kicker{font-family:monospace;text-transform:uppercase;letter-spacing:.22em;color:#88aab3;font-size:11px}
+.clock{font-family:monospace;color:var(--muted);font-size:12px}
+.hero{padding:22px;flex:none}
+.hero h2{font-size:30px;font-weight:normal;margin:10px 0 8px;text-shadow:0 0 14px rgba(125,249,255,.4)}
+.hero p{color:#9eafb6;line-height:1.6;margin:0;font-size:13px}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;flex:none}
+.tile{padding:14px;min-height:84px;color:var(--ink);text-align:left;cursor:pointer}
+.tile:hover{transform:translateY(-2px);border-color:rgba(190,230,235,.3)}
+.tile .symbol{font-size:19px;color:var(--holo)}
+.tile b{display:block;margin-top:8px;font-size:13px}
+.tile span{font-size:11px;color:var(--muted);font-family:monospace}
+.feed{display:grid;gap:10px}
+.card{padding:16px;min-width:0}
+.card h3{margin:0 0 12px;font-size:11px;font-family:monospace;letter-spacing:.2em;color:#88aab3;font-weight:normal}
+.news{display:grid;gap:10px}
+.newsitem{padding:11px;border-radius:12px;background:rgba(255,255,255,.025);font-size:12px}
+.newsitem small{display:block;color:#74878e;margin-top:5px}
+.right{display:flex;flex-direction:column;min-height:0;min-width:0}
+.chatCore{flex:1;display:flex;flex-direction:column;min-height:0}
+.friendlist{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-y:scroll;overflow-x:hidden;max-height:232px;padding:2px 4px 2px 2px;flex:none;scrollbar-width:thin;scrollbar-gutter:stable}
+.memberlist{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;flex:none;scrollbar-width:thin}
+.member{display:flex;align-items:center;gap:8px;padding:6px 10px 6px 6px;border-radius:12px;background:rgba(255,255,255,.025);border:1px solid var(--line);flex:none;max-width:200px}
+.member .avatar{width:28px;height:28px;font-size:12px;flex:none}
+.membername{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.member .dot{flex:none}
+.member.online .dot{background:#a8d8cf;box-shadow:0 0 8px #a8d8cf}
+.friend{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px;border-radius:14px;background:rgba(255,255,255,.025);border:1px solid transparent;color:var(--ink);text-align:left;min-width:0}
+.friend:hover{border-color:var(--line);background:rgba(150,220,225,.07)}
+.friend.selected{border-color:rgba(100,149,237,.6);background:rgba(100,149,237,.16);box-shadow:0 0 14px rgba(100,149,237,.4),inset 0 0 14px rgba(100,149,237,.1)}
+.friend.selected .friendname{color:#e8f0ff;text-shadow:0 0 8px rgba(100,149,237,.85),0 0 22px rgba(100,149,237,.45)}
+.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:bold;color:#dceff1;background:radial-gradient(circle at 35% 30%,#a9d3d7,#293b42 58%,#11191e);box-shadow:inset 0 0 0 1px rgba(255,255,255,.15),0 0 10px rgba(125,249,255,.35);overflow:hidden;padding:0;flex:none}
+.avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.friendname{font-size:13px}.statusline{font-size:10px;color:#71858c;font-family:monospace;margin-top:2px}
+.dot{width:7px;height:7px;border-radius:50%;background:#77949b}.online .dot{background:#a8d8cf;box-shadow:0 0 8px #a8d8cf}
+.chatbox{margin-top:12px;border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;flex:1;min-height:0}
+.chatlog{flex:1;min-height:0;max-height:none;overflow-y:scroll;overflow-x:hidden;display:grid;align-content:start;gap:12px;padding:4px 8px 4px 2px;scrollbar-gutter:stable}
+.msg{font-size:12.5px;line-height:1.6;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(125,249,255,.1);max-width:92%}
+.msg.me{margin-left:auto;background:rgba(150,220,225,.1)}
+.msg small{display:block;color:#71858c;margin-top:3px;font-family:monospace;font-size:10px}
+.chatrow{display:flex;gap:8px;margin-top:10px}
+/* icon rail: labels hidden, hover the icon for its name */
+.left{padding:12px 8px}
+.left .brand{justify-content:center;margin-bottom:14px}
+.left .brand div:last-child{display:none}
+.left .quote{display:none}
+.left nav{gap:6px}
+.navbtn{text-align:center;padding:11px 2px;font-size:22px;line-height:1.2}
+.navbtn .lbl{display:none}
+/* FIX: login gates first, titles get breathing room, no card overlap */
+#chatlogEl,#friendlistEl{scrollbar-width:thin;scrollbar-color:#8fa8b8 rgba(255,255,255,.04)}
+#chatlogEl::-webkit-scrollbar,#friendlistEl::-webkit-scrollbar{width:8px}
+#chatlogEl::-webkit-scrollbar-thumb,#friendlistEl::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#c3cfd4,#5f7d92);border-radius:8px;border:2px solid #0b1118}
+#chatlogEl::-webkit-scrollbar-track,#friendlistEl::-webkit-scrollbar-track{background:rgba(255,255,255,.05);border-radius:8px}
+#login{z-index:50;background:rgba(4,7,11,.97)}
+#login .modal{margin:0}
+.chatCore h3{margin:4px 0 14px!important}
+.chatbox > div:first-child{margin-bottom:10px!important;letter-spacing:.18em}
+.friend > div:nth-child(2){min-width:0}
+.friendname,.statusline{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.statusline{margin-top:4px!important}
+.avgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:12px 0}
+.avgrid button{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:4px;cursor:pointer}
+.avgrid button:hover{border-color:rgba(190,230,235,.4)}
+.avgrid img{width:100%;height:52px;object-fit:cover;border-radius:8px;display:block}
+.avgrid.small img{height:40px}
+.avgrid.small button{padding:8px 4px;text-align:center}
+.avgrid.small .vdot{width:26px;height:26px;border-radius:50%;margin:4px auto 5px;display:block}
+.avgrid .vname{display:block;font-size:9px;color:var(--muted);font-family:monospace;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.avgrid button.sel{border-color:var(--holo-bright);box-shadow:0 0 10px rgba(125,249,255,.45)}
+#login .modal{max-height:92vh;overflow-y:auto}
+.chatrow{margin-top:10px}
+.chatrow input,.modal input,.modal textarea{width:100%;background:#080e13;color:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;outline:none;font-family:monospace;font-size:12px}
+.send,.primary{border:1px solid rgba(180,230,235,.25);background:rgba(160,220,225,.12);color:#e9f6f7;border-radius:10px;padding:10px 14px}
+.link{background:none;border:0;color:#9fcbd1;font-size:12px;padding:8px 0;font-family:monospace}
+#login{position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:rgba(3,6,9,.82);backdrop-filter:blur(10px)}
+.modal{width:min(430px,calc(100vw - 34px));padding:28px;border-radius:18px}
+.modal h2{font-weight:normal;margin:0 0 7px;font-size:30px}
+.modal p{color:var(--muted);font-size:13px;line-height:1.5}
+.form{display:grid;gap:10px;margin-top:16px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 16px;border:1px solid var(--line);background:#101920ee;border-radius:12px;color:#cce8eb;opacity:0;pointer-events:none;transition:.25s;z-index:30;font-family:monospace}
+#toast.show{opacity:1}
+.overlay{position:fixed;inset:0;z-index:20;display:none;place-items:center;background:rgba(3,6,9,.72)}
+.overlay .card{width:min(600px,calc(100vw - 30px));max-height:80vh;overflow:auto}
+.holoCtl{font-family:monospace;font-size:11px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.holoCtl button{background:rgba(125,249,255,.08);border:1px solid var(--line);color:var(--holo);border-radius:8px;padding:4px 10px;font-family:monospace;font-size:11px}
+body.flat .holo:before,body.flat .flick,body.flat .holo:after{display:none}
+body.flat .gridfloor,body.flat .beam{opacity:.08}
+@media(max-width:1050px){body{overflow:auto}#app{grid-template-columns:56px minmax(0,1fr);height:auto;min-height:100vh;overflow:visible}.left{grid-column:1;grid-row:1 / span 2}.right{grid-column:2;grid-row:1}.center{grid-column:2;grid-row:2;max-height:none}aside{max-height:none;overflow:visible}.tiles{grid-template-columns:repeat(2,1fr)}.friendlist{grid-template-columns:repeat(2,minmax(0,1fr))}.chatlog{min-height:260px;max-height:60vh}}
+@media(max-width:720px){body{overflow:auto}#app{height:auto;min-height:100vh;overflow:visible;grid-template-columns:minmax(0,1fr)}.left{display:none}.right{grid-column:1;grid-row:1}.center{grid-column:1;grid-row:2;max-height:none}aside{max-height:none;overflow:visible}.friendlist{grid-template-columns:repeat(2,minmax(0,1fr))}.chatlog{min-height:240px;max-height:55vh}}
+</style>
+<style>
+
+body{font-family:'Space Mono',Georgia,monospace;}
+#scene{background:radial-gradient(ellipse at 50% 30%,rgba(63,6,95,.42),transparent 46%),radial-gradient(ellipse at 20% 80%,rgba(0,229,255,.06),transparent 35%),linear-gradient(#0a0412 0%,#12071f 55%,#0a0412 100%);}
+.holo{background:rgba(26,10,42,.93);border:2px solid #8fa3ab;box-shadow:5px 5px 0 rgba(143,163,171,.35),0 0 22px rgba(63,6,95,.55);}
+.kicker{color:#00e5ff;text-shadow:2px 2px #3f065f;}
+.navbtn,.tile span,.clock,.statusline,.holoCtl,.link{font-family:'Space Mono',monospace;}
+.navbtn:hover,.navbtn.active{box-shadow:0 0 12px rgba(0,229,255,.4);}
+.whisp{position:fixed;z-index:8;pointer-events:none;opacity:0;width:150px;}
+.whisp img{width:130px;height:130px;object-fit:cover;border:2px solid #00e5ff;box-shadow:4px 4px 0 #c9d4d8;display:block;}
+.whisp.flip img{border-color:#c9d4d8;box-shadow:4px 4px 0 #00e5ff;}
+.whisp .wm{font-family:'Space Mono',monospace;font-size:10px;line-height:1.5;color:#dfe6e9;background:rgba(30,10,50,.94);border-left:3px solid #c9d4d8;padding:6px 8px;margin-top:6px;max-width:200px;}
+.whisp .wm b{color:#00e5ff;}
+.quizopt{display:block;width:100%;text-align:left;margin:7px 0;padding:11px 12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line);color:#cfe0e4;cursor:pointer;font-size:13px;line-height:1.5}
+.quizopt:hover{border-color:rgba(125,249,255,.5);background:rgba(125,249,255,.08)}
+.quizbar{height:6px;background:rgba(255,255,255,.07);border-radius:4px;margin:10px 0;overflow:hidden}
+.quizbar i{display:block;height:100%;background:linear-gradient(90deg,#00e5ff,#c9d4d8)}
+.trophy{display:grid;gap:8px}
+.trophyitem{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 10px;border-radius:12px;background:rgba(244,197,66,.06);border:1px solid rgba(244,197,66,.25)}
+.trophyitem img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid rgba(244,197,66,.6);display:block}
+.trophyitem .cup{font-size:20px}
+.trophyitem b{font-size:13px}
+.trophyitem small{display:block;color:var(--muted);font-family:monospace;font-size:10px;margin-top:3px}
+.msgact{display:inline-flex;gap:6px;margin-left:8px;vertical-align:middle}
+.msgact button{background:rgba(255,255,255,.06);border:1px solid var(--line);color:#9fb6bd;font-size:10px;padding:2px 8px;border-radius:8px;cursor:pointer;font-family:monospace;letter-spacing:.04em}
+.msgact button:hover{color:#fff;border-color:rgba(125,249,255,.5)}
+.boardact{display:flex;gap:6px;margin-top:6px}
+.boardact button{background:rgba(255,255,255,.06);border:1px solid var(--line);color:#9fb6bd;font-size:10px;padding:3px 10px;border-radius:8px;cursor:pointer;font-family:monospace}
+.boardact button:hover{color:#fff;border-color:rgba(125,249,255,.5)}
+#boardEditArea{width:100%;background:#080e13;color:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;font-family:monospace;font-size:12px;outline:none}
+#typingEl{min-height:18px;font-size:11px;color:#8fa8b8;font-family:monospace;margin-top:6px}
+#typingEl .caret{display:inline-block;width:8px;color:#a8d8cf;animation:caretblink 1s steps(1) infinite}
+@keyframes caretblink{50%{opacity:0}}
+#msgEditArea{width:100%;background:#080e13;color:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:monospace;font-size:12px;outline:none}
+.danger{border:1px solid rgba(224,57,62,.5);background:rgba(224,57,62,.1);color:#f0b9bb;border-radius:10px;padding:10px 14px}
+.modsec{font-size:10px;color:#7d9198;font-family:monospace;letter-spacing:.18em;margin:16px 0 8px}
+#overlayCardEl input[type="checkbox"]{width:auto}
+</style>
+<div id="scene"><canvas id="stars"></canvas><div class="ruin"></div><div class="lamp l1"></div><div class="lamp l2"></div><div class="lamp l3"></div><div class="gridfloor"></div><div class="beam"></div><div class="flick"></div><div class="scan"></div></div>
+<div id="login"><div class="scan"></div><div class="modal holo clip"><div class="kicker" id="loginKickerEl">A quiet place beneath the earth</div><h2 id="loginTitleEl">HollowNest</h2><p id="loginTextEl">Members only. Log in or join with your email to enter the nest.</p><div class="form"><input id="loginNameInput" placeholder="Email" autocomplete="username"><input id="loginPassInput" placeholder="Password" type="password" autocomplete="current-password"><input id="joinNameInput" placeholder="Display name (new members)" autocomplete="nickname"><div style="font-size:10px;color:#7d9198;font-family:monospace;letter-spacing:.18em;margin-top:6px">CHOOSE YOUR VESSEL</div><div class="avgrid small" id="joinAvatarGrid"></div><button class="primary" id="enterBtn">Log In</button><button class="primary" id="joinBtn">Join the Nest</button><button class="link" id="recoverBtn">Forgot password?</button></div><p id="authNote"></p></div></div>
+<div id="app" hidden>
+<aside class="holo clip left"><div class="brand"><div class="mask"><i class="dagger"></i></div><div><h1 id="brandNameEl">HollowNest</h1><small id="brandSubEl">your little corner</small></div></div>
+<nav>
+<button class="navbtn active" title="Home" aria-label="Home">⌂<span class="lbl">Home</span></button>
+<button class="navbtn" data-open="https://www.youtube.com/" title="YouTube" aria-label="YouTube">◉<span class="lbl">YouTube</span></button>
+<button class="navbtn" data-open="https://www.tumblr.com/" title="Tumblr" aria-label="Tumblr">✦<span class="lbl">Tumblr</span></button>
+<button class="navbtn" data-open="https://www.instagram.com/" title="Instagram" aria-label="Instagram">◎<span class="lbl">Instagram</span></button>
+<button class="navbtn" id="newsNavBtn" title="Animation News" aria-label="Animation News">✧<span class="lbl">Animation News</span></button>
+<button class="navbtn" id="quizNavBtn" title="Which Hollownest character are you?" aria-label="Quiz">🏆<span class="lbl">Quiz</span></button>
+<button class="navbtn" data-open="https://hollowknight.wiki" title="Hollow Knight Wiki" aria-label="Hollow Knight Wiki">📖<span class="lbl">Wiki</span></button>
+<button class="navbtn" id="soundNavBtn" title="Soundtrack" aria-label="Soundtrack">🎧<span class="lbl">Soundtrack</span></button>
+<button class="navbtn" id="statusNavBtn" title="My Status" aria-label="My Status">✎<span class="lbl">My Status</span></button>
+<button class="navbtn" id="settingsNavBtn" title="Settings" aria-label="Settings">⚙<span class="lbl">Settings</span></button>
+<button class="navbtn" id="modNavBtn" title="Moderation Station" aria-label="Moderation Station" hidden>🛡<span class="lbl">Moderation Station</span></button>
+<button class="navbtn" id="logoutNavBtn" title="Log out" aria-label="Log out">⏻<span class="lbl">Log out</span></button>
+</nav><div class="quote">“No cost too great.”<br><span>— HollowNest, a private fan project<br>Not affiliated with Team Cherry or Hollow Knight.</span></div></aside>
+<aside class="holo clip right"><div class="chatCore"><h3 style="font-family:monospace;letter-spacing:.2em;font-size:11px;color:#88aab3;margin:2px 0 12px">IN THE NEST // MEMBERS</h3><div class="memberlist" id="memberlistEl"></div><h3 style="font-family:monospace;letter-spacing:.2em;font-size:11px;color:#88aab3;margin:14px 0 12px">YOUR TEN // MIDDLE NEST</h3><div class="friendlist" id="friendlistEl"></div><div class="chatbox"><div style="font-size:11px;color:#7d9198;font-family:monospace;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px"><span>CHAT WITH <span id="chatWithEl">Hornet</span></span><span style="display:flex;gap:6px"><button class="send" id="chatTopBtn" title="Scroll to top" style="padding:4px 10px">&uarr;</button><button class="send" id="chatBottomBtn" title="Scroll to bottom" style="padding:4px 10px">&darr;</button></span></div><div class="chatlog" id="chatlogEl" tabindex="0"></div><div id="typingEl"></div><div class="chatrow"><input id="chatInputEl" placeholder="leave a little message…"><button class="send" id="chatSendBtn">↗</button></div></div></div></aside>
+<main class="center"><div class="holo topbar clip"><div class="kicker" id="topKickerEl">Hallownest / private desktop</div><div style="display:flex;gap:12px;align-items:center"><div class="holoCtl"><span>HOLO</span><button id="holoToggleBtn">ON</button></div><div class="avatar" id="topAvatarEl" title="My avatar" style="width:30px;height:30px;font-size:13px;flex:none">W</div><div class="clock" id="clockEl"></div></div></div>
+<section class="holo hero clip"><div class="kicker" id="heroKickerEl">Good evening, wanderer.</div><h2 id="welcomeEl">The lanterns are waiting.</h2><p id="heroTextEl">Your personal corner for music, friends, animation news, and the places you visit most — now soul-light over old stone. Same kingdom, new shimmer.</p></section>
+<section class="feed"><div class="holo card clip"><h3>MY STATUS</h3><div style="display:flex;gap:12px;align-items:center;margin-bottom:6px"><div class="avatar" id="statusAvatarEl" title="Change picture" style="width:46px;height:46px;font-size:18px;flex:none;cursor:pointer">W</div><div id="statusViewEl" style="color:#a9b8bd;font-size:13px;line-height:1.6">The kingdom is quiet tonight.</div></div><button class="link" id="statusChangeBtn">Change status →</button> <button class="link" id="avatarChangeBtn">Change avatar →</button></div><div class="holo card clip"><h3>NOTICE BOARD</h3><div class="news" id="boardListEl"><div class="newsitem"><b>The nest is open</b><small>Lanterns lit for all members.</small></div><div class="newsitem"><b>Your status can appear here</b><small>Post something for your ten to see.</small></div><div class="newsitem"><b>Projection over ruins stable</b><small>Old stone, new light — 87% clarity.</small></div></div></div><div class="holo card clip"><h3>SCORE BOARD // VESSEL QUIZ 🏆</h3><div style="font-size:12px;color:#9eafb6;margin-bottom:10px;line-height:1.6">Which Hollownest character are you? Take the quiz and meet the vessel you should have been.</div><button class="primary" id="quizStartBtn">Take the quiz →</button><div class="trophy" id="trophyListEl" style="margin-top:12px"></div></div>
+</section>
+<section class="tiles">
+<button class="holo tile clip" data-open="https://www.youtube.com/"><div class="symbol">◉</div><b>YouTube</b><span>watch &amp; wander</span></button>
+<button class="holo tile clip" data-open="https://www.tumblr.com/"><div class="symbol">✦</div><b>Tumblr</b><span>quiet discoveries</span></button>
+<button class="holo tile clip" data-open="https://www.instagram.com/"><div class="symbol">◎</div><b>Instagram</b><span>people &amp; places</span></button>
+<button class="holo tile clip" id="newsTileBtn"><div class="symbol">✧</div><b>Animation News</b><span>latest stories</span></button>
+<button class="holo tile clip" id="quizTileBtn"><div class="symbol">🏆</div><b>Vessel Quiz</b><span>which character are you?</span></button>
+<button class="holo tile clip" id="modTileBtn" hidden><div class="symbol">🛡</div><b>Moderation Station</b><span>owner only</span></button>
+</section></main>
+</div>
+<div id="overlay" class="overlay"><div class="holo card clip" id="overlayCardEl"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>window.HOLLOWNEST_SUPABASE={url:"https://xzhsscjdaffzldnqwpxl.supabase.co",publishableKey:"sb_publishable_2kgs2eC5z4W0LxOo0qe5WQ_5UJAcBB7"};</script>
+<div id="toast"></div>
+<script>
+const friends=[{name:"Hornet",avatar:"H",img:"https://user.uploads.dev/file/4f846cba8476c488f29b3e763cc81249.jpg",trait:"Fierce protector - sharp-witted",online:true},{name:"Ghost",avatar:"G",img:"https://user.uploads.dev/file/391b418c0181efb7be55bdc62f75510d.jpg",trait:"Silent wanderer - curious",online:true},{name:"Quirrel",avatar:"Q",img:"https://user.uploads.dev/file/1fb8663de36d134bbeb24909d161bfdc.jpg",trait:"Cheerful explorer - loyal",online:true},{name:"Grimm",avatar:"G",img:"https://user.uploads.dev/file/6823ea365796c457cd4f7201cb84d17d.jpg",trait:"Theatrical ritualist - hungry",online:true},{name:"Hollow Knight",avatar:"H",img:"https://user.uploads.dev/file/9f10201619e0380c3e3380f84df8e31f.jpg",trait:"Mournful vessel - dutiful",online:false},{name:"White Lady",avatar:"W",img:"https://user.uploads.dev/file/3122da4fa6467f8a7b939c633d4a2e38.jpg",trait:"Bound mother - gentle",online:true},{name:"Mantis Lords",avatar:"M",img:"https://user.uploads.dev/file/7ba55a5d906e3527f3e24424c35f3056.jpg",trait:"Proud warriors - honorable",online:true},{name:"Soul Master",avatar:"S",img:"https://user.uploads.dev/file/12156967f9d7b269d8f89fea44331351.jpg",trait:"Arrogant scholar - obsessive",online:false},{name:"Nosk",avatar:"N",img:"https://user.uploads.dev/file/9af23a73d616766ecebf5b24fedca952.jpg",trait:"Patient mimic - lurking",online:false},{name:"Radiance",avatar:"R",img:"https://user.uploads.dev/file/8a5ce7853280c60b8b65f3b781c43cf3.jpg",trait:"Radiant light - prideful",online:true}];
+let selected=0,hallSelected=false,hall=[],messages={0:[["Hornet","Little ghost. So the middle nest suits you after all.",false],["You","I finally got the little desktop working.",true],["Hornet","Hm. Persistent as ever. I am normally quite perceptive — you, I underestimated.",false],["You","High praise, coming from Hallownest's protector.",true],["Hornet","Do not flatter me. You have burdened yourself with the fate of this world, yet you still stand strong.",false],["You","The lanterns are lit. The nest is quiet tonight.",true],["Hornet","Then rest while you can. No shadow will haunt you here. I shall see to that.",false],["You","Will you sit with me a while?",true],["Hornet","...A moment. Even I must set down my needle sometime.",false],["You","Quirrel was asking after the rain above.",true],["Hornet","His melancholy suits him. But his counsel is sound — if your nail dulls, seek the Nailsmith.",false],["Hornet","Stay sharp, little ghost. The nest watches with you.",false]]};
+let echoes=[];
+let audioCtx=null,master=null,soundOn=false;
+const $=id=>document.getElementById(id);
+function showApp(){const a=$("app");if(a)a.hidden=false;const l=$("login");if(l)l.style.display="none";}
+function showLogin(){$("login").style.display="grid";const a=$("app");if(a)a.hidden=true;}
+function showToast(t){const e=$("toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2200)}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+let sb=null,sbUser=null,backendOn=false;
+function backendCfg(){const fb={url:"https://xzhsscjdaffzldnqwpxl.supabase.co",key:"sb_publishable_2kgs2eC5z4W0LxOo0qe5WQ_5UJAcBB7"};try{const project=window.HOLLOWNEST_SUPABASE||{};return{url:localStorage.getItem("hn_sb_url")||project.url||fb.url,key:localStorage.getItem("hn_sb_key")||project.publishableKey||fb.key}}catch(e){const project=window.HOLLOWNEST_SUPABASE||{};return{url:project.url||fb.url,key:project.publishableKey||fb.key}}}
+function dispName(u){if(!u)return"Wanderer";if(u.user_metadata&&u.user_metadata.display_name)return u.user_metadata.display_name;if(u.email)return u.email.split("@")[0];return"Wanderer"}
+async function initBackend(){const c=backendCfg();if(!c.url||!c.key||!window.supabase)return;try{sb=window.supabase.createClient(c.url,c.key);const session=await sb.auth.getSession();sbUser=session.data&&session.data.session?session.data.session.user:null;if(sbUser){backendOn=true;await afterBackendLogin(true)}sb.auth.onAuthStateChange(async(ev,sess)=>{sbUser=sess?sess.user:null;backendOn=!!sbUser;if(sbUser)await afterBackendLogin(false)});subscribeRealtime()}catch(e){sb=null;showToast("Offline mode — changes stay on this device.")}}
+
+function subscribeRealtime(){if(!sb)return;try{sb.channel("hollownest-live").on("postgres_changes",{event:"INSERT",schema:"public",table:"messages"},async payload=>{if(!payload.new)return;if(payload.new.recipient_id===null){if(sbUser&&payload.new.sender_id!==sbUser.id){try{tick()}catch(e){}}await loadHall();if(!hallSelected)showToast("New message in the Nest Hall.");}else if(sbUser&&(payload.new.sender_id===sbUser.id||payload.new.recipient_id===sbUser.id)){if(payload.new.sender_id!==sbUser.id){try{tick()}catch(e){}}await loadChat()}}).on("postgres_changes",{event:"INSERT",schema:"public",table:"status_posts"},()=>loadEchoes()).subscribe()}catch(e){}}
+
+async function afterBackendLogin(silent){const n=dispName(sbUser);try{localStorage.setItem("hollownest_demo_user",n)}catch(e){}showApp();$("welcomeEl").textContent=(silent?"Welcome back, ":"Welcome, ")+n+".";await ensureProfile();await loadProfile();try{loadRole()}catch(e){}try{startPresence()}catch(e){}await loadFriends();await loadChat();await loadEchoes();try{renderBoard()}catch(e){}try{renderTrophyBoard()}catch(e){}try{renderOwnerUI()}catch(e){}try{renderMembers()}catch(e){}if(!silent)showToast("Welcome home.")}
+
+async function ensureProfile(){if(!sb||!sbUser)return;const meta=sbUser.user_metadata||{};const username=(sbUser.email?sbUser.email.split("@")[0]:"wanderer").replace(/[^a-zA-Z0-9_]/g,"").slice(0,40)||("wanderer_"+sbUser.id.slice(0,8));const display=meta.display_name||dispName(sbUser);try{const r=await sb.from("profiles").select("id").eq("id",sbUser.id).maybeSingle();if(!r.data)await sb.from("profiles").insert({id:sbUser.id,username,display_name:display,avatar_id:1})}catch(e){}}
+
+async function loadProfile(){if(!sb||!sbUser)return;try{const r=await sb.from("profiles").select("display_name,status_text,avatar_url,avatar_id").eq("id",sbUser.id).single();if(r.data){if(r.data.avatar_url){try{if(!localStorage.getItem("hn_avatar"))localStorage.setItem("hn_avatar",r.data.avatar_url)}catch(e){}}else if(r.data.avatar_id&&AVATARS[r.data.avatar_id-1]){try{if(!localStorage.getItem("hn_avatar"))localStorage.setItem("hn_avatar",AVATARS[r.data.avatar_id-1])}catch(e){}}try{renderMyAvatar()}catch(e){}$("statusViewEl").textContent=r.data.status_text||"The kingdom is quiet tonight.";$('welcomeEl').textContent="Welcome, "+(r.data.display_name||dispName(sbUser))+"."}}catch(e){}}
+
+async function loadFriends(){if(!sb||!sbUser)return;try{const r=await sb.from("friendships").select("friend_id,profiles:friend_id(id,display_name,avatar_id,avatar_url,status_text)").eq("user_id",sbUser.id);if(r.data&&r.data.length){friends.splice(0,friends.length,...r.data.slice(0,10).map((x,i)=>{const p=x.profiles||{};const img=p.avatar_url||AVATARS[(p.avatar_id||0)-1]||"";return{id:x.profiles.id,name:p.display_name||"Friend "+(i+1),avatar:String(p.avatar_id||i+1),img:img||undefined,line:p.status_text||"",online:true}}));if(selected>=friends.length)selected=0;renderFriends();$("chatWithEl").textContent=friends[selected]?.name||"friend"}}catch(e){}}
+
+async function loadChat(){if(!sb||!sbUser||!friends[selected]?.id)return;const id=friends[selected].id;try{const r=await sb.from("messages").select("id,sender_id,recipient_id,body,created_at").or("and(sender_id.eq."+sbUser.id+",recipient_id.eq."+id+"),and(sender_id.eq."+id+",recipient_id.eq."+sbUser.id+")").order("created_at",{ascending:true}).limit(100);if(r.data){messages[selected]=r.data.map(m=>[m.sender_id===sbUser.id?"You":friends[selected].name,m.body,m.sender_id===sbUser.id,m.created_at,m.id]);renderChat()}}catch(e){}}
+
+async function loadEchoes(){if(!sb||!sbUser)return;try{const r=await sb.from("status_posts").select("id,body,created_at,author_id,profiles:author_id(display_name)").order("created_at",{ascending:true}).limit(60);if(r.data){const me=sbUser.id;echoes=r.data.map(x=>({t:x.body,w:(x.profiles&&x.profiles.display_name)||"Wanderer",id:x.id,author:x.author_id||null,mine:!!(x.author_id&&x.author_id===me)}));renderEchoes()}}catch(e){}}
+
+let dotTimer=null;function setButtons(dis){try{if(!dis&&dotTimer){clearInterval(dotTimer);dotTimer=null}$("enterBtn").disabled=dis;if($("joinBtn"))$("joinBtn").disabled=dis;$("enterBtn").style.opacity=dis?.55:1;if($("joinBtn"))$("joinBtn").style.opacity=dis?.55:1}catch(e){}}function busyNote(t){const el=$("authNote");let d=0;el.textContent=t;if(dotTimer)clearInterval(dotTimer);dotTimer=setInterval(()=>{const ell=$("authNote");d=(d+1)%4;ell.textContent=t+".".repeat(d)},450);setButtons(true)}function idleNote(t){if(dotTimer){clearInterval(dotTimer);dotTimer=null}if(t!==undefined&&t!==null)$("authNote").textContent=t;setButtons(false)}function lanternRace(p,ms){return Promise.race([p.then(r=>({ok:true,r}),e=>({ok:false,r:e})),new Promise(res=>setTimeout(()=>res({ok:false,slow:true}),ms))])}
+async function ensureSb(){if(!window.supabase)return null;const c=backendCfg();if(!c.url||!c.key)return null;if(!sb){try{sb=window.supabase.createClient(c.url,c.key)}catch(e){return null}}return sb}
+async function loginNest(){const em=$("loginNameInput").value.trim();const pw=$("loginPassInput").value;if(em.indexOf("@")<0||!pw){$("authNote").textContent="Enter your email and password.";return}const s=await ensureSb();if(!s){$("authNote").textContent="The nest is unreachable right now. Check your connection and try again.";return}busyNote("Checking the lanterns");try{const o=await lanternRace(s.auth.signInWithPassword({email:em,password:pw}),25000);if(o.slow||!o.r){idleNote("The lanterns are slow to answer. Wait a moment, then retry.");return}const r=o.r;if(r.error){idleNote(r.error.message);return}sbUser=r.data.user;backendOn=true;await afterBackendLogin(false);setButtons(false)}catch(e){idleNote("Login failed. Try again.")}}
+async function joinNest(){const em=$("loginNameInput").value.trim();const pw=$("loginPassInput").value;if(em.indexOf("@")<0||!pw){$("authNote").textContent="Enter an email and a password to join.";return}if(pw.length<6){$("authNote").textContent="Password needs at least 6 characters.";return}const s=await ensureSb();if(!s){$("authNote").textContent="The nest is unreachable right now. Check your connection and try again.";return}busyNote("Lighting your lantern");try{let joinName=em.split("@")[0];try{const jn=$("joinNameInput").value.trim().slice(0,24);if(jn)joinName=jn;}catch(e){}const o=await lanternRace(s.auth.signUp({email:em,password:pw,options:{data:{display_name:joinName},emailRedirectTo:location.href}}),25000);if(o.slow||!o.r){idleNote("The lanterns are slow to answer. Your request may still land — wait a moment, then log in.");return}const up=o.r;if(up.error){const m=up.error.message||"Join failed.";idleNote(/already registered/i.test(m)?"That email already joined. Click Log In instead.":m);return}if(!up.data.session){idleNote("Lantern lit. Confirm your email, then log in.");return}sbUser=up.data.session.user;backendOn=true;try{if(window._joinAvatar>=0&&vesselImg(window._joinAvatar)){try{localStorage.setItem("hn_avatar",vesselImg(window._joinAvatar))}catch(e){}try{await s.from("profiles").update({display_name:joinName,avatar_url:vesselImg(window._joinAvatar),avatar_id:window._joinAvatar+1}).eq("id",sbUser.id)}catch(e){}}else{try{await s.from("profiles").update({display_name:joinName}).eq("id",sbUser.id)}catch(e){}}}catch(e){}try{await s.from("profiles").select("id").eq("id",sbUser.id).limit(1)}catch(e){}await afterBackendLogin(false);setButtons(false)}catch(e){idleNote("Join failed. Try again.")}}
+
+const AVATARS=["https://user.uploads.dev/file/4f846cba8476c488f29b3e763cc81249.jpg","https://user.uploads.dev/file/391b418c0181efb7be55bdc62f75510d.jpg","https://user.uploads.dev/file/1fb8663de36d134bbeb24909d161bfdc.jpg","https://user.uploads.dev/file/6823ea365796c457cd4f7201cb84d17d.jpg","https://user.uploads.dev/file/9f10201619e0380c3e3380f84df8e31f.jpg","https://user.uploads.dev/file/3122da4fa6467f8a7b939c633d4a2e38.jpg","https://user.uploads.dev/file/7ba55a5d906e3527f3e24424c35f3056.jpg","https://user.uploads.dev/file/12156967f9d7b269d8f89fea44331351.jpg","https://user.uploads.dev/file/9af23a73d616766ecebf5b24fedca952.jpg","https://user.uploads.dev/file/8a5ce7853280c60b8b65f3b781c43cf3.jpg"];
+function getMyAvatar(){try{return localStorage.getItem("hn_avatar")||""}catch(e){return ""}}
+function myInitial(){try{const u=localStorage.getItem("hollownest_demo_user")||"W";return (u[0]||"W").toUpperCase()}catch(e){return "W"}}
+function renderMyAvatar(){const a=getMyAvatar(),init=myInitial();const t=$("topAvatarEl");if(t)t.innerHTML=a?'<img src="'+a+'" alt="me">':escapeHtml(init);const s=$("statusAvatarEl");if(s)s.innerHTML=a?'<img src="'+a+'" alt="me">':escapeHtml(init);const p=$("avatarPreviewEl");if(p)p.innerHTML=a?'<img src="'+a+'" alt="me">':escapeHtml(init);}
+async function setMyAvatar(url){try{localStorage.setItem("hn_avatar",url)}catch(e){}renderMyAvatar();try{refreshPresence()}catch(e){}if(sb&&sbUser){try{await sb.from("profiles").update({avatar_url:url}).eq("id",sbUser.id)}catch(e){}try{const i=AVATARS.indexOf(url);if(i>=0)await sb.from("profiles").update({avatar_id:i+1}).eq("id",sbUser.id)}catch(e){}}showToast("Avatar updated.");}
+function nameModal(){let cur="Wanderer";try{cur=localStorage.getItem("hollownest_demo_user")||"Wanderer"}catch(e){}openOverlay('<h3>DISPLAY NAME</h3><p style="color:#82969d">The name everyone sees on your avatar, messages and the notice board.</p><input id="nameInputEl" value="'+escapeHtml(cur)+'"><br><br><button class="primary" id="nameSaveBtn">Save name</button>');$("nameSaveBtn").onclick=saveName;}
+async function saveName(){const v=$("nameInputEl").value.trim().slice(0,24);if(!v){showToast("Enter a name first.");return}try{localStorage.setItem("hollownest_demo_user",v)}catch(e){}$("welcomeEl").textContent="Welcome, "+v+".";if(sb&&sbUser){try{await sb.from("profiles").update({display_name:v}).eq("id",sbUser.id)}catch(e){}try{await sb.auth.updateUser({data:{display_name:v}})}catch(e){}}try{renderMyAvatar()}catch(e){}try{refreshPresence()}catch(e){}try{renderMembers()}catch(e){}closeOverlay();showToast("Name updated.");}
+function avatarModal(){openOverlay('<h3>MY AVATAR</h3><p style="color:#82969d">Pick a vessel, paste an image link, or upload your own. Friends change theirs the same way when logged in.</p><div style="display:flex;gap:12px;align-items:center;margin-top:8px"><div class="avatar" id="avatarPreviewEl" style="width:54px;height:54px;font-size:20px;flex:none">W</div><div style="font-size:11px;color:#7d9198;font-family:monospace">THIS IS YOU</div></div><div class="avgrid" id="avatarGridEl">'+AVATARS.map((u,i)=>'<button data-av="'+i+'" title="Vessel '+(i+1)+'"><img src="'+u+'" alt="vessel '+(i+1)+'"></button>').join("")+'</div><input id="avatarUrlInput" placeholder="Paste image link, then Use link"><br><br><input id="avatarFileInput" type="file" accept="image/*"><br><br><button class="primary" id="avatarSaveUrlBtn">Use link</button> <button class="link" id="avatarClearBtn">Reset to initial</button>');renderMyAvatar();Array.from(document.querySelectorAll("#avatarGridEl button")).forEach(b=>b.onclick=()=>setMyAvatar(AVATARS[Number(b.dataset.av)]));$("avatarSaveUrlBtn").onclick=()=>{const u=$("avatarUrlInput").value.trim();if(!u){showToast("Paste an image link first.");return}setMyAvatar(u);};$("avatarClearBtn").onclick=()=>setMyAvatar("");$("avatarFileInput").onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{const img=new Image();img.onload=()=>{try{const s=128,c=document.createElement("canvas");c.width=s;c.height=s;const ctx=c.getContext("2d");const side=Math.min(img.width,img.height);ctx.drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,s,s);setMyAvatar(c.toDataURL("image/jpeg",.72));}catch(err){showToast("That image would not load.")}};img.onerror=()=>showToast("That image would not load.");img.src=rd.result;};rd.readAsDataURL(f);};}
+const VESSEL_NAMES=["Hornet","Ghost","Quirrel","Grimm","Hollow Knight","White Lady","Mantis Lords","Soul Master","Nosk","Radiance"];
+const VESSEL_COLORS=["#e0393e","#e8f0f2","#4aa3df","#a00f2d","#9aa3a8","#dcefe0","#5dbb63","#9b59b6","#e67e22","#f4c542"];
+window._joinAvatar=-1;
+function buildJoinGrid(){const g=$("joinAvatarGrid");if(!g||typeof AVATARS==="undefined")return;g.innerHTML=AVATARS.map((u,i)=>'<button data-j="'+i+'" title="'+vesselName(i)+'"><span class="vdot" style="background:'+VESSEL_COLORS[i]+';box-shadow:0 0 10px '+VESSEL_COLORS[i]+'"></span><span class="vname">'+vesselName(i)+'</span></button>').join("");Array.from(g.querySelectorAll("button")).forEach(b=>b.onclick=()=>{window._joinAvatar=Number(b.dataset.j);Array.from(g.querySelectorAll("button")).forEach(x=>{x.classList.remove("sel");x.style.borderColor="";x.style.boxShadow="";});b.classList.add("sel");const c=VESSEL_COLORS[window._joinAvatar];b.style.borderColor=c;b.style.boxShadow="0 0 12px "+c;try{localStorage.setItem("hn_avatar",vesselImg(window._joinAvatar));renderMyAvatar();}catch(e){}});}
+function magnifyFriend(i){const f=friends[i];if(!f)return;openOverlay('<div style="display:flex;gap:16px;align-items:center"><div class="avatar" style="width:96px;height:96px;font-size:34px;flex:none">'+(f.img?'<img src="'+f.img+'" alt="'+escapeHtml(f.name)+'">':escapeHtml(f.avatar||(f.name||"F")[0]))+'</div><div><div style="font-size:20px">'+escapeHtml(f.name)+'</div><div style="font-size:11px;color:#7d9198;font-family:monospace;margin-top:6px">'+escapeHtml((friendLine(f))+" · "+(f.online?"online":"away"))+'</div></div></div><br><button class="primary" id="magChatBtn">Open chat \u2192</button>');$("magChatBtn").onclick=()=>{selectFriend(i);closeOverlay();};}
+function friendLine(f){return f.line||f.trait||"Bound ally";}
+function enterHall(){try{noteTypingStopped()}catch(e){}hallSelected=true;$("chatWithEl").textContent="Nest Hall";renderFriends();renderHall();if(backendOn)loadHall();}
+function renderHall(){const arr=hall||[];$("chatlogEl").innerHTML=arr.map((m,i)=>'<div class="msg '+(m[2]?"me":"")+'" data-mi="'+i+'"><b>'+escapeHtml(m[2]?"You":m[0])+'</b><br>'+escapeHtml(m[1])+"<small>"+(m[3]?new Date(m[3]).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}):"now")+msgActions(i,m)+'</small></div>').join("")||'<div style="color:#71858c;font-size:12px">The hall is quiet. Gather everyone with the first message.</div>';const el=$("chatlogEl");el.scrollTop=el.scrollHeight;wireMsgActions("hall")}
+async function loadHall(){if(!sb||!sbUser)return;try{const r=await sb.from("messages").select("id,body,created_at,sender_id,profiles:sender_id(display_name)").is("recipient_id",null).order("created_at",{ascending:true}).limit(100);if(r.data){const me=sbUser.id;hall=r.data.map(m=>[m.sender_id===me?"You":((m.profiles&&m.profiles.display_name)||"Wanderer"),m.body,m.sender_id===me,m.created_at,m.id]);if(hallSelected)renderHall();}}catch(e){}}
+async function sendHall(v){const inp=$("chatInputEl");let who="Wanderer";try{who=localStorage.getItem("hollownest_demo_user")||"Wanderer"}catch(e){}if(backendOn&&sb&&sbUser){try{const o=await lanternRace(sb.from("messages").insert({sender_id:sbUser.id,recipient_id:null,body:v}),12000);if(o.slow||!o.ok)throw new Error("unreachable");const r=o.r;if(r.error)throw new Error(r.error.message);inp.value="";try{noteTypingStopped();chime()}catch(e){}await loadHall();return}catch(e){showToast("Nest archive unreachable — message kept on this device.");}}(hall=hall||[]).push([who,v,true]);inp.value="";try{noteTypingStopped();chime()}catch(e){}renderHall();}
+function magnifyHall(){const n=friends.length;openOverlay('<div style="display:flex;gap:16px;align-items:center"><div class="avatar" style="width:96px;height:96px;font-size:34px;flex:none">\u25c8</div><div><div style="font-size:20px">Nest Hall</div><div style="font-size:11px;color:#7d9198;font-family:monospace;margin-top:6px">everyone \u00b7 group chat \u00b7 '+n+' bound allies</div></div></div><br><button class="primary" id="magChatBtn">Open hall \u2192</button>');$("magChatBtn").onclick=()=>{enterHall();closeOverlay();};}
+function renderFriends(){$("friendlistEl").innerHTML='<button class="friend '+(hallSelected?"selected":"")+' online" data-hall="1" title="Everyone in the nest — double-click to magnify"><div class="avatar">\u25c8</div><div><div class="friendname">Nest Hall</div><div class="statusline">everyone · group chat</div></div><div class="dot"></div></button>'+(friends.length?friends.map((f,i)=>'<button class="friend '+(i===selected&&!hallSelected?"selected":"")+' '+(f.online?"online":"")+'" data-i="'+i+'" title="'+escapeHtml(friendLine(f)+" — double-click to magnify")+'"><div class="avatar">'+(f.img?'<img src="'+f.img+'" alt="">':escapeHtml(f.avatar))+'</div><div><div class="friendname">'+escapeHtml(f.name)+'</div><div class="statusline">'+(escapeHtml(friendLine(f))+" · "+(f.online?"online":"away"))+'</div></div><div class="dot"></div></button>').join(""):'<div style="grid-column:1/-1;color:#71858c;font-size:12px;padding:8px">Your ten have not arrived yet.</div>');Array.from(document.querySelectorAll(".friend")).forEach(b=>{if(b.dataset.hall){b.onclick=()=>enterHall();b.ondblclick=()=>magnifyHall();}else{b.onclick=()=>selectFriend(Number(b.dataset.i));b.ondblclick=()=>magnifyFriend(Number(b.dataset.i));}})}
+function chime(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume();const t=audioCtx.currentTime,dest=(typeof master!=="undefined"&&master)?master:audioCtx.destination;[[880,0],[1318.5,.09]].forEach(([f,d])=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(.0001,t+d);g.gain.linearRampToValueAtTime(.1,t+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d+.7);o.connect(g);g.connect(dest);o.start(t+d);o.stop(t+d+.8);});}catch(e){}}
+function selectFriend(i){try{noteTypingStopped()}catch(e){}selected=i;hallSelected=false;try{chime()}catch(e){}$('chatWithEl').textContent=friends[i]?.name||"friend";renderFriends();renderChat();if(backendOn)loadChat()}
+function renderChat(){const arr=messages[selected]||[];$("chatlogEl").innerHTML=arr.map((m,i)=>'<div class="msg '+(m[2]?"me":"")+'" data-mi="'+i+'"><b>'+escapeHtml(m[2]?"You":m[0])+'</b><br>'+escapeHtml(m[1])+"<small>"+(m[3]?new Date(m[3]).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}):"now")+msgActions(i,m)+'</small></div>').join("")||'<div style="color:#71858c;font-size:12px">No messages yet. Leave the first little note.</div>';const el=$("chatlogEl");el.scrollTop=el.scrollHeight;wireMsgActions("dm")}
+async function sendMessage(){const inp=$("chatInputEl"),v=inp.value.trim();if(!v)return;if(hallSelected){await sendHall(v);return}if(!friends[selected])return;if(backendOn&&sb&&sbUser&&friends[selected].id){try{const o=await lanternRace(sb.from("messages").insert({sender_id:sbUser.id,recipient_id:friends[selected].id,body:v}),12000);if(o.slow||!o.ok)throw new Error("unreachable");const r=o.r;if(r.error)throw new Error(r.error.message);inp.value="";try{noteTypingStopped();chime()}catch(e){}await loadChat();return}catch(e){showToast("Nest archive unreachable — message kept on this device.");}}(messages[selected]=messages[selected]||[]).push(["You",v,true]);inp.value="";try{noteTypingStopped();chime()}catch(e){}renderChat()}
+function myDisplayName(){try{return localStorage.getItem("hollownest_demo_user")||"Wanderer"}catch(e){return "Wanderer"}}
+function isEchoMine(e){if(!e)return false;if(typeof e.mine==="boolean")return e.mine;try{if(typeof sbUser!=="undefined"&&sbUser&&e.author&&e.author===sbUser.id)return true}catch(x){}try{return String(e.w||"")===String(myDisplayName()||"")}catch(x){return false}}
+function echoActions(idx,e){const mine=isEchoMine(e);let owner=false;try{owner=isOwner()}catch(x){}if(!mine&&!owner)return "";let h='<span class="boardact">';if(mine)h+='<button data-bact="edit" data-bi="'+idx+'" title="Edit your post">\u270E Edit</button>';h+='<button data-bact="del" data-bi="'+idx+'" title="'+(mine?"Delete your post":"Delete this post (owner)")+'">\u00D7 Delete</button>';return h+'</span>';}
+function persistEchoes(){try{localStorage.setItem("hollownest_echoes",JSON.stringify(echoes))}catch(e){}}
+function renderBoard(){const el=$("boardListEl");if(!el)return;const items=(echoes||[]).map((e,idx)=>({e:e,idx:idx})).slice(-3).reverse();el.innerHTML=items.length?items.map(function(o){return '<div class="newsitem" data-b="'+o.idx+'"><b>'+escapeHtml(o.e.t)+'</b><small>'+escapeHtml(o.e.w)+'</small>'+echoActions(o.idx,o.e)+'</div>'}).join(""):'<div class="newsitem"><b>The nest is open</b><small>Lanterns lit for all members.</small></div><div class="newsitem"><b>Your status can appear here</b><small>Post something for your ten to see.</small></div><div class="newsitem"><b>Projection over ruins stable</b><small>Old stone, new light — 87% clarity.</small></div>';wireBoardActions();}
+function renderEchoes(){const list=$("echoListEl");if(!list){try{renderBoard()}catch(e){}return}list.innerHTML=echoes.map((e,idx)=>'<div class="echo" data-b="'+idx+'">'+escapeHtml(e.t)+'<small>'+escapeHtml(e.w)+" \u00B7 "+(e.id?"posted":"nest")+'</small>'+echoActions(idx,e)+'</div>').join("")||'<div style="color:#71858c;font-size:12px">No echoes yet. Leave the first one.</div>';list.scrollTop=list.scrollHeight;try{renderBoard()}catch(e){}try{wireBoardActions()}catch(e){}}
+function wireBoardActions(){const els=[$("boardListEl"),$("echoListEl")];els.forEach(function(root){if(!root)return;Array.from(root.querySelectorAll(".boardact button")).forEach(function(b){b.onclick=function(ev){try{ev.stopPropagation()}catch(x){}const i=Number(b.dataset.bi);if(b.dataset.bact==="edit")startEditBoard(i);else askDeleteBoard(i);};});});}
+function startEditBoard(i){const e=(echoes||[])[i];if(!e||!isEchoMine(e))return;openOverlay('<h3>EDIT POST</h3><textarea id="boardEditArea" rows="4">'+escapeHtml(e.t)+'</textarea><br><br><button class="primary" id="boardSaveBtn">Save</button> <button class="link" id="boardCancelBtn">Cancel</button>');$("boardSaveBtn").onclick=function(){saveBoardEdit(i);};$("boardCancelBtn").onclick=closeOverlay;const ta=$("boardEditArea");try{ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}catch(x){try{ta.focus()}catch(y){}}}
+async function saveBoardEdit(i){const e=(echoes||[])[i];if(!e)return;const v=$("boardEditArea").value.trim();if(!v){showToast("Post cannot be empty.");return}if(backendOn&&sb&&sbUser&&e.id){try{const r=await sb.from("status_posts").update({body:v}).eq("id",e.id);if(r.error){showToast(r.error.message);return}closeOverlay();await loadEchoes();showToast("Post updated.");return;}catch(x){showToast("Update failed.");return}}e.t=v;persistEchoes();closeOverlay();renderEchoes();showToast("Post updated.");}
+function askDeleteBoard(i){const e=(echoes||[])[i];if(!e)return;let owner=false;try{owner=isOwner()}catch(x){}if(!isEchoMine(e)&&!owner)return;openOverlay('<h3>DELETE POST?</h3><div class="newsitem"><b>'+escapeHtml(String(e.t).slice(0,200))+'</b><small>'+escapeHtml(e.w||"")+'</small></div><br><button class="danger" id="boardDelYes">Delete</button> <button class="link" id="boardDelNo">Keep it</button>');$("boardDelYes").onclick=function(){doDeleteBoard(i);};$("boardDelNo").onclick=closeOverlay;}
+async function doDeleteBoard(i){const e=(echoes||[])[i];if(!e){closeOverlay();return}if(backendOn&&sb&&sbUser&&e.id){try{const r=await sb.from("status_posts").delete().eq("id",e.id);if(r.error){showToast(r.error.message);return}closeOverlay();await loadEchoes();showToast("Post deleted.");return;}catch(x){showToast("Delete failed.");return}}echoes.splice(i,1);persistEchoes();closeOverlay();renderEchoes();showToast("Post deleted.");}
+function openOverlay(h){$("overlayCardEl").innerHTML=h;$("overlay").style.display="grid"}
+function closeOverlay(){$("overlay").style.display="none"}
+function statusModal(){openOverlay('<h3>MY STATUS</h3><p style="color:#82969d">Write a small note for your friends.</p><textarea id="statusInputEl" rows="5">'+escapeHtml($("statusViewEl").textContent)+'</textarea><br><button class="primary" style="margin-top:10px" id="postStatusBtn">Post status</button>');$("postStatusBtn").onclick=saveStatus}
+async function saveStatus(){const v=$("statusInputEl").value.trim();if(!v){closeOverlay();return}const who=myDisplayName();$("statusViewEl").textContent=v;try{localStorage.setItem("hollownest_status",v)}catch(e){}if(backendOn&&sb&&sbUser){try{await sb.from("profiles").update({status_text:v}).eq("id",sbUser.id)}catch(e){}try{const r=await sb.from("status_posts").insert({author_id:sbUser.id,body:v});if(r.error){showToast(r.error.message);}else{try{await loadEchoes()}catch(e){}}}catch(e){showToast("Status kept on this device.");echoes.push({t:v,w:who,mine:true,author:null});persistEchoes();renderEchoes();}}else{echoes.push({t:v,w:who,mine:true,author:null});persistEchoes();renderEchoes();}closeOverlay();showToast("Status posted.")}
+/* Owner role + Moderation Station */
+const OWNER_DEFAULT_KEY="hollow-founder";
+function ownerKey(){try{return localStorage.getItem("hollownest_owner_key")||OWNER_DEFAULT_KEY}catch(e){return OWNER_DEFAULT_KEY}}
+function isOwner(){try{return localStorage.getItem("hollownest_owner")==="1"}catch(e){return false}}
+function renderOwnerUI(){const o=isOwner();const n=$("modNavBtn");if(n)n.hidden=!o;const t=$("modTileBtn");if(t)t.hidden=!o;}
+function claimOwner(){const inp=$("ownerKeyInput");const v=(inp?inp.value:"").trim();if(!v){showToast("Enter the founder key first.");return}if(v===ownerKey()){try{localStorage.setItem("hollownest_owner","1")}catch(e){}if(sb&&sbUser){try{sb.from("profiles").update({role:"owner"}).eq("id",sbUser.id).then(function(){},function(){})}catch(e){}}renderOwnerUI();closeOverlay();showToast("Owner access granted. 🛡");}else{showToast("That key does not match.");}}
+async function loadRole(){if(!sb||!sbUser)return;try{const r=await sb.from("profiles").select("role").eq("id",sbUser.id).single();if(r.data&&r.data.role==="owner"){try{localStorage.setItem("hollownest_owner","1")}catch(e){}renderOwnerUI();}}catch(e){}}
+function vesselName(i){return (typeof friends!=="undefined"&&friends[i]&&friends[i].name)||VESSEL_NAMES[i];}
+function vesselImg(i){return (typeof friends!=="undefined"&&friends[i]&&friends[i].img)||AVATARS[i];}
+function defaultSiteText(){return{brandName:"HollowNest",brandSub:"your little corner",topKicker:"Hallownest / private desktop",heroKicker:"Good evening, wanderer.",heroText:"Your personal corner for music, friends, animation news, and the places you visit most — now soul-light over old stone. Same kingdom, new shimmer.",loginKicker:"A quiet place beneath the earth",loginTitle:"HollowNest",loginText:"Members only. Log in or join with your email to enter the nest."};}
+const SITE_TEXT_FIELDS=[["brandName","Brand name"],["brandSub","Brand subtitle"],["topKicker","Top bar kicker"],["heroKicker","Hero kicker"],["heroText","Hero paragraph"],["loginKicker","Login kicker"],["loginTitle","Login title"],["loginText","Login text"]];
+function loadSiteCfg(){try{return Object.assign(defaultSiteText(),JSON.parse(localStorage.getItem("hollownest_site_cfg")||"{}"))}catch(e){return defaultSiteText()}}
+function applySiteConfig(){const c=loadSiteCfg();SITE_TEXT_FIELDS.forEach(function(f){const e=$(f[0]+"El");if(e)e.textContent=c[f[0]]||defaultSiteText()[f[0]];});
+try{const ov=JSON.parse(localStorage.getItem("hollownest_vessels")||"[]");if(ov.length&&friends.length===10&&!friends.some(function(f){return f.id})){ov.forEach(function(o,i){if(o&&friends[i]){if(i===5&&o.name==="Pure Vessel")return;if(o.name)friends[i].name=o.name;if(typeof o.trait==="string")friends[i].trait=o.trait;if(o.img&&!(i===2&&(o.img.indexOf("0e98d9ff")>-1||o.img.indexOf("dbcc77d3")>-1||o.img.indexOf("0eb33ded")>-1)))friends[i].img=o.img;if(typeof o.online==="boolean")friends[i].online=o.online;}});}}catch(e){}
+try{const qb=JSON.parse(localStorage.getItem("hollownest_quizblurbs")||"[]");if(qb.length===10){for(let i=0;i<10;i++)if(qb[i]&&!(i===5&&qb[i].indexOf("the light itself holds still")>-1))QUIZ_BLURB[i]=qb[i];}}catch(e){}}
+function modModal(){
+if(!isOwner()){showToast("Owner only.");return}
+const c=loadSiteCfg();
+const siteHtml=SITE_TEXT_FIELDS.map(function(f){return '<div style="margin-bottom:6px"><div style="font-size:10px;color:#7d9198;font-family:monospace">'+f[1]+'</div><input id="site_'+f[0]+'" value="'+escapeHtml(c[f[0]]||"")+'"></div>'}).join("");
+const rows=friends.slice(0,10).map(function(f,i){return '<div class="newsitem"><b>'+(i+1)+'. vessel</b><br><input data-vn="'+i+'" value="'+escapeHtml(f.name||"")+'" placeholder="Name" style="margin-top:6px"><input data-vt="'+i+'" value="'+escapeHtml(f.trait||"")+'" placeholder="Trait / subtitle" style="margin-top:6px"><input data-vi="'+i+'" value="'+escapeHtml(f.img||"")+'" placeholder="Portrait image URL" style="margin-top:6px"><label style="display:block;margin-top:6px;font-size:11px;color:#7d9198;font-family:monospace"><input type="checkbox" data-vo="'+i+'"'+(f.online?" checked":"")+'> online</label></div>'}).join("");
+const blurbs=QUIZ_BLURB.map(function(b,i){return '<div style="margin-bottom:6px"><div style="font-size:10px;color:#7d9198;font-family:monospace">'+escapeHtml(vesselName(i))+' — quiz result text</div><input data-qb="'+i+'" value="'+escapeHtml(b)+'"></div>'}).join("");
+openOverlay('<h3>MODERATION STATION 🛡</h3><p style="color:#82969d">Owner only. Everything you change here reshapes the nest.</p>'
++'<div class="modsec">SITE WORDS</div>'+siteHtml
++'<div class="modsec">VESSELS // YOUR TEN (demo roster)</div>'+rows
++'<div class="modsec">QUIZ RESULT TEXTS</div>'+blurbs
++'<div class="modsec">ANNOUNCE</div><input id="modAnnounceInput" placeholder="Write an owner announcement…"><br><br><button class="primary" id="modAnnounceBtn">Post announcement 📣</button>'
++'<div class="modsec">FOUNDER KEY</div><input id="modKeyInput" value="'+escapeHtml(ownerKey())+'">'
++'<div class="modsec">DANGER</div><button class="danger" id="modClearTrophiesBtn">Clear trophy board</button> <button class="danger" id="modResetBtn">Reset all customizations</button>'
++'<br><br><button class="primary" id="modSaveBtn">Save everything</button> <button class="link" id="modCloseBtn">Close</button>');
+$("modSaveBtn").onclick=saveMod;$("modCloseBtn").onclick=closeOverlay;
+$("modAnnounceBtn").onclick=postAnnouncement;
+$("modClearTrophiesBtn").onclick=function(){try{localStorage.setItem("hollownest_quiz_board","[]")}catch(e){}renderTrophyBoard();showToast("Trophy board cleared.");};
+$("modResetBtn").onclick=function(){try{localStorage.removeItem("hollownest_site_cfg");localStorage.removeItem("hollownest_vessels");localStorage.removeItem("hollownest_quizblurbs")}catch(e){}location.reload();};
+}
+function saveMod(){
+const g=function(id){const e=$(id);return e?e.value.trim():"";};
+const d=defaultSiteText();const cfg={};
+SITE_TEXT_FIELDS.forEach(function(f){cfg[f[0]]=g("site_"+f[0])||d[f[0]];});
+try{localStorage.setItem("hollownest_site_cfg",JSON.stringify(cfg))}catch(e){}
+const ov=[];for(let i=0;i<10;i++){const n=document.querySelector('[data-vn="'+i+'"]'),t=document.querySelector('[data-vt="'+i+'"]'),im=document.querySelector('[data-vi="'+i+'"]'),on=document.querySelector('[data-vo="'+i+'"]');ov.push({name:n?n.value.trim():"",trait:t?t.value.trim():"",img:im?im.value.trim():"",online:on?on.checked:false});}
+try{localStorage.setItem("hollownest_vessels",JSON.stringify(ov))}catch(e){}
+const qb=[];for(let i=0;i<10;i++){const e=document.querySelector('[data-qb="'+i+'"]');qb.push(e?e.value.trim():"");}
+try{localStorage.setItem("hollownest_quizblurbs",JSON.stringify(qb))}catch(e){}
+const nk=g("modKeyInput");if(nk){try{localStorage.setItem("hollownest_owner_key",nk)}catch(e){}}
+applySiteConfig();renderFriends();try{buildJoinGrid()}catch(e){}closeOverlay();showToast("The nest reshapes to your will. 🛡");
+}
+async function postAnnouncement(){
+const v=$("modAnnounceInput").value.trim();if(!v){showToast("Write the announcement first.");return}
+let who="Owner";try{who=localStorage.getItem("hollownest_demo_user")||"Owner"}catch(e){}
+const line="📣 "+v;
+if(backendOn&&sb&&sbUser){try{const r=await sb.from("status_posts").insert({author_id:sbUser.id,body:line});if(r.error){showToast(r.error.message);return}await loadEchoes();}catch(e){showToast("Announcement failed.");return}}
+else{echoes.push({t:line,w:who+" (owner)",mine:true,author:null});try{localStorage.setItem("hollownest_echoes",JSON.stringify(echoes))}catch(e){}renderEchoes();}
+$("modAnnounceInput").value="";showToast("Announcement posted.");
+}
+const QUIZ_Q=[
+{q:"A quiet evening falls over the nest. You…",o:[
+{t:"Patrol the borders, needle in hand",v:[0,0,6]},
+{t:"Wander off alone past the next gate",v:[1,1,2]},
+{t:"Light the lanterns and gather everyone for a tale",v:[3,3,2]},
+{t:"Sink into stillness and dream",v:[9,9,4]}]},
+{q:"Choose your weapon.",o:[
+{t:"Needle and thread — fast, sharp, precise",v:[0,0,6]},
+{t:"An old nail, chipped but loyal",v:[1,1,4]},
+{t:"A good mask and a better story",v:[2,2,3]},
+{t:"Pure soul, focused into a spell",v:[7,7,5]}]},
+{q:"Your friends would describe you as…",o:[
+{t:"Fierce — impossible to fool",v:[0,0,6]},
+{t:"Quiet — you say little, feel much",v:[1,1,4]},
+{t:"Warm — the one everyone trusts",v:[2,2,5]},
+{t:"Magnetic — every room bends toward you",v:[3,3,9]}]},
+{q:"Choose a place to rest.",o:[
+{t:"Greenpath moss, rain-soft and alive",v:[2,2,1]},
+{t:"The stage — red curtains, breathing dark",v:[3,3,8]},
+{t:"The White Palace, gleaming and silent",v:[5,5,4]},
+{t:"Deepnest, where the dark thinks",v:[8,8,7]}]},
+{q:"When the darkness comes, you…",o:[
+{t:"Stand between it and the ones you love",v:[0,0,4]},
+{t:"Face it alone, without a word",v:[1,1,5]},
+{t:"Study it — everything can be understood",v:[7,7,2]},
+{t:"Become it, and wear its face",v:[8,8,9]}]},
+{q:"What do you want most?",o:[
+{t:"Honour — a duel fought fairly",v:[6,6,0]},
+{t:"Freedom — no seals, no chains",v:[1,1,2]},
+{t:"Devotion — to be worshipped, remembered",v:[9,9,3]},
+{t:"Duty — hold the line, whatever it costs",v:[4,4,5]}]}];
+const QUIZ_BLURB=[
+"Fierce protector, sharp-witted and watchful. You guard what you love with needle and thread.",
+"Silent wanderer, endlessly curious. You feel deeply and speak only when it matters.",
+"Cheerful explorer with a philosopher's heart. Your warmth steadies everyone around you.",
+"Theatrical ritualist — every entrance is a performance, every ember a promise.",
+"Mournful vessel, dutiful to the last. You carry heavy things so others don't have to.",
+"Bound mother, gentle and endless. From your roots, the whole nest can bloom.",
+"Proud warrior of the Mantis tribe. Honour first — your stance has never once wavered.",
+"Arrogant scholar of the soul. Knowledge is power, and you intend to hold all of it.",
+"Patient mimic, lurking in the warm dark. You watch, you wait, you become.",
+"Radiant light, ancient and prideful. Even your dreams reshape the world."];
+let quizStep=0,quizScores=null;
+function openQuizModal(){quizStep=0;quizScores=new Array(10).fill(0);renderQuizStep();}
+function renderQuizStep(){
+if(quizStep>=QUIZ_Q.length){finishQuiz();return}
+const q=QUIZ_Q[quizStep];
+openOverlay('<h3>WHICH HOLLOWNEST CHARACTER ARE YOU? 🏆</h3><p style="color:#82969d">Question '+(quizStep+1)+' of '+QUIZ_Q.length+'</p><div class="quizbar"><i style="width:'+Math.round(quizStep/QUIZ_Q.length*100)+'%"></i></div><div style="font-size:15px;margin:8px 0 4px">'+escapeHtml(q.q)+'</div>'+q.o.map((o,i)=>'<button class="quizopt" data-q="'+i+'">'+escapeHtml(o.t)+'</button>').join(""));
+Array.from(document.querySelectorAll(".quizopt")).forEach(b=>b.onclick=()=>{const o=q.o[Number(b.dataset.q)];o.v.forEach(c=>{quizScores[c]=(quizScores[c]||0)+1;});quizStep++;renderQuizStep();});
+}
+function quizWinner(){let w=0;for(let i=1;i<10;i++)if((quizScores[i]||0)>(quizScores[w]||0))w=i;return w;}
+function myVesselIdx(){try{const a=getMyAvatar();if(a){const i=AVATARS.indexOf(a);if(i>=0)return i;}}catch(e){}return -1;}
+async function finishQuiz(){
+const w=quizWinner();const mine=myVesselIdx();
+let who="Wanderer";try{who=localStorage.getItem("hollownest_demo_user")||"Wanderer";}catch(e){}
+const same=(mine===w);
+const myName=(mine>=0?vesselName(mine):"a wanderer face");
+openOverlay('<h3>THE LANTERNS HAVE SPOKEN 🏆</h3><div style="display:flex;gap:16px;align-items:center;margin:10px 0"><div class="avatar" style="width:84px;height:84px;font-size:30px;flex:none"><img src="'+vesselImg(w)+'" alt="'+escapeHtml(vesselName(w))+'"></div><div><div style="font-size:20px">You are '+escapeHtml(vesselName(w))+'!</div><div style="font-size:12px;color:#9eafb6;margin-top:6px;line-height:1.6">'+escapeHtml(QUIZ_BLURB[w])+'</div></div></div><div class="newsitem"><b>'+(same?"You chose true! ✨":"You chose "+escapeHtml(myName)+" — but you should have been "+escapeHtml(vesselName(w))+"!")+'</b><small>'+(same?"Your vessel was the right one all along.":"Fun — will you take their mask, or stay as you are?")+'</small></div><br><div style="display:flex;gap:8px;flex-wrap:wrap">'+(same?"":'<button class="primary" id="quizTakeBtn">Take their mask →</button>')+'<button class="primary" id="quizRetakeBtn">Retake</button><button class="link" id="quizCloseBtn">Return to HollowNest</button></div>');
+if(!same)$("quizTakeBtn").onclick=async()=>{await setMyAvatar(vesselImg(w));saveTrophy(who,w);closeOverlay();};
+$("quizRetakeBtn").onclick=openQuizModal;$("quizCloseBtn").onclick=closeOverlay;
+saveTrophy(who,w);
+}
+function loadTrophies(){try{return JSON.parse(localStorage.getItem("hollownest_quiz_board")||"[]")}catch(e){return []}}
+function renderTrophyBoard(){
+const el=$("trophyListEl");if(!el)return;const arr=loadTrophies();
+el.innerHTML=arr.length?arr.slice().reverse().map(t=>'<div class="trophyitem"><img src="'+vesselImg(t.c)+'" alt=""><div><b>'+escapeHtml(t.n)+'</b><small>is truly '+escapeHtml(vesselName(t.c))+' · '+new Date(t.d).toLocaleDateString([],{month:"short",day:"numeric"})+'</small></div><div class="cup">🏆</div></div>').join(""):'<div style="color:#71858c;font-size:12px">No vessels crowned yet. Be the first.</div>';
+}
+async function saveTrophy(who,w){
+try{let arr=loadTrophies();arr.push({n:String(who).slice(0,24),c:w,d:Date.now()});arr=arr.slice(-20);localStorage.setItem("hollownest_quiz_board",JSON.stringify(arr));}catch(e){}
+renderTrophyBoard();
+const line="🏆 "+who+" took the vessel quiz and is truly "+vesselName(w)+"!";
+if(backendOn&&sb&&sbUser){try{await sb.from("status_posts").insert({author_id:sbUser.id,body:line});await loadEchoes();}catch(e){}}
+else{echoes.push({t:line,w:who,mine:true,author:null});try{localStorage.setItem("hollownest_echoes",JSON.stringify(echoes))}catch(e){}renderEchoes();}
+showToast("🏆 "+vesselName(w)+" crowned on the score board!");
+}
+/* chat message edit + delete (own messages; owners can delete anyone's) */
+function msgActions(i,m){
+const mine=!!m[2];let owner=false;try{owner=isOwner()}catch(e){}
+if(!mine&&!owner)return "";
+let h='<span class="msgact">';
+if(mine)h+='<button data-act="edit" data-i="'+i+'" title="Edit your message">\u270E Edit</button>';
+h+='<button data-act="del" data-i="'+i+'" title="'+(mine?"Delete your message":"Delete this message (owner)")+'">\u00D7 Delete</button>';
+return h+'</span>';
+}
+function wireMsgActions(kind){const el=$("chatlogEl");if(!el)return;Array.from(el.querySelectorAll(".msgact button")).forEach(function(b){b.onclick=function(ev){try{ev.stopPropagation()}catch(e){}const i=Number(b.dataset.i);if(b.dataset.act==="edit")startEditMsg(kind,i);else askDeleteMsg(kind,i);};});}
+function startEditMsg(kind,i){
+const arr=kind==="hall"?hall:messages[selected];const m=arr?arr[i]:null;if(!m||!m[2])return;
+const div=$("chatlogEl").querySelector('[data-mi="'+i+'"]');if(!div)return;
+div.innerHTML='<textarea id="msgEditArea" rows="3">'+escapeHtml(m[1])+'</textarea><div style="margin-top:6px;display:flex;gap:8px;align-items:center"><button class="send" id="msgSaveBtn">Save</button><button class="link" id="msgCancelBtn">Cancel</button></div>';
+$("msgSaveBtn").onclick=function(){saveEditMsg(kind,i);};
+$("msgCancelBtn").onclick=function(){if(kind==="hall")renderHall();else renderChat();};
+const ta=$("msgEditArea");try{ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}catch(e){try{ta.focus()}catch(e2){}}
+}
+async function saveEditMsg(kind,i){
+const arr=kind==="hall"?hall:messages[selected];const m=arr?arr[i]:null;if(!m)return;
+const v=$("msgEditArea").value.trim();if(!v){showToast("Message cannot be empty.");return}
+const mid=m[4];
+if(backendOn&&sb&&sbUser&&mid){try{const r=await sb.from("messages").update({body:v}).eq("id",mid);if(r.error){showToast(r.error.message);return}if(kind==="hall")await loadHall();else await loadChat();showToast("Message updated.");return;}catch(e){showToast("Update failed.");return}}
+m[1]=v;if(kind==="hall")renderHall();else renderChat();showToast("Message updated.");
+}
+function askDeleteMsg(kind,i){
+const arr=kind==="hall"?hall:messages[selected];const m=arr?arr[i]:null;if(!m)return;
+let owner=false;try{owner=isOwner()}catch(e){}
+if(!m[2]&&!owner)return;
+openOverlay('<h3>DELETE MESSAGE?</h3><div class="newsitem"><b>'+escapeHtml(String(m[1]).slice(0,200))+'</b></div><br><button class="danger" id="msgDelYes">Delete</button> <button class="link" id="msgDelNo">Keep it</button>');
+$("msgDelYes").onclick=function(){doDeleteMsg(kind,i);};
+$("msgDelNo").onclick=closeOverlay;
+}
+async function doDeleteMsg(kind,i){
+const arr=kind==="hall"?hall:messages[selected];const m=arr?arr[i]:null;if(!m){closeOverlay();return}
+const mid=m[4];
+if(backendOn&&sb&&sbUser&&mid){try{const r=await sb.from("messages").delete().eq("id",mid);if(r.error){showToast(r.error.message);return}closeOverlay();if(kind==="hall")await loadHall();else await loadChat();showToast("Message deleted.");return;}catch(e){showToast("Delete failed.");return}}
+arr.splice(i,1);closeOverlay();if(kind==="hall")renderHall();else renderChat();showToast("Message deleted.");
+}
+/* self-serve profile deletion */
+function deleteAccountModal(){
+openOverlay('<h3>DELETE PROFILE?</h3><p style="color:#82969d;line-height:1.6">This removes your display name, avatar, status, echoes, messages and friendships from the nest, then signs you out. This cannot be undone.</p><br><button class="danger" id="delYesBtn">Delete my profile</button> <button class="link" id="delNoBtn">Keep it</button>');
+$("delYesBtn").onclick=doDeleteAccount;$("delNoBtn").onclick=closeOverlay;
+}
+async function doDeleteAccount(){
+const id=(typeof sbUser!=="undefined"&&sbUser)?sbUser.id:null;
+if(sb&&id){try{await sb.from("status_posts").delete().eq("author_id",id)}catch(e){}
+try{await sb.from("messages").delete().eq("sender_id",id)}catch(e){}
+try{await sb.from("messages").delete().eq("recipient_id",id)}catch(e){}
+try{await sb.from("friendships").delete().eq("user_id",id)}catch(e){}
+try{await sb.from("friendships").delete().eq("friend_id",id)}catch(e){}
+try{const r=await sb.from("profiles").delete().eq("id",id);if(r.error)showToast("Note: profile row kept ("+r.error.message+")");}catch(e){showToast("Note: profile row could not be removed.");}
+try{await sb.auth.signOut()}catch(e){}}
+try{localStorage.removeItem("hollownest_demo_user");localStorage.removeItem("hollownest_local_session");localStorage.removeItem("hn_avatar");localStorage.removeItem("hollownest_status");localStorage.removeItem("hollownest_owner");}catch(e){}
+sbUser=null;backendOn=false;try{await stopPresence()}catch(e){}closeOverlay();showLogin();$("welcomeEl").textContent="The lanterns are waiting.";showToast("Profile deleted. The nest forgets.");
+}
+/* live member presence (you + who's online now) */
+let presenceChannel=null,liveMembers={};
+function presencePayload(){let n="Wanderer",a="";try{n=localStorage.getItem("hollownest_demo_user")||"Wanderer";a=localStorage.getItem("hn_avatar")||""}catch(e){}return{display_name:String(n).slice(0,24),avatar_url:a,at:Date.now()};}
+function readPresenceState(){const m={};try{const s=presenceChannel.presenceState();Object.keys(s).forEach(function(k){const p=s[k][0];if(p)m[k]={n:p.display_name||"Wanderer",a:p.avatar_url||""};});}catch(e){}liveMembers=m;}
+async function startPresence(){
+if(!sb||!sbUser)return;
+try{
+try{if(presenceChannel)await sb.removeChannel(presenceChannel);}catch(e){}
+presenceChannel=sb.channel("nest-presence",{config:{presence:{key:sbUser.id}}});
+presenceChannel.on("presence",{event:"sync"},function(){readPresenceState();renderMembers();});
+presenceChannel.on("presence",{event:"join"},function(){readPresenceState();renderMembers();});
+presenceChannel.on("presence",{event:"leave"},function(){readPresenceState();renderMembers();});
+presenceChannel.on("broadcast",{event:"typing"},function(p){try{const d=p.payload||{};if(!sbUser||d.from===sbUser.id)return;typingState={name:String(d.name||"Someone").slice(0,24),to:d.to,at:Date.now()};renderTyping();}catch(e){}});
+presenceChannel.on("broadcast",{event:"typing-stop"},function(p){try{const d=p.payload||{};if(typingState&&d.from&&typingState.to===d.to){typingState=null;}renderTyping();}catch(e){}});
+await presenceChannel.subscribe();
+await presenceChannel.track(presencePayload());
+}catch(e){}
+}
+async function refreshPresence(){if(presenceChannel&&sbUser){try{await presenceChannel.track(presencePayload())}catch(e){}}}
+async function stopPresence(){if(presenceChannel&&sb){try{await presenceChannel.untrack()}catch(e){}try{await sb.removeChannel(presenceChannel)}catch(e){}}presenceChannel=null;liveMembers={};try{renderMembers()}catch(e){}}
+function renderMembers(){
+const el=$("memberlistEl");if(!el)return;
+let me="Wanderer",myAv="";try{me=localStorage.getItem("hollownest_demo_user")||"Wanderer";myAv=localStorage.getItem("hn_avatar")||""}catch(e){}
+const myId=(typeof sbUser!=="undefined"&&sbUser)?sbUser.id:"me";
+const others=Object.keys(liveMembers).filter(function(k){return k!==myId}).map(function(k){return{n:liveMembers[k].n,a:liveMembers[k].a};});
+let h='<div class="member online" title="You are here"><div class="avatar">'+(myAv?'<img src="'+escapeHtml(myAv)+'" alt="">':escapeHtml((me[0]||"W").toUpperCase()))+'</div><div class="membername">'+escapeHtml(me)+' (you)</div><div class="dot"></div></div>';
+h+=others.map(function(o){return '<div class="member online" title="'+escapeHtml(o.n)+' is here"><div class="avatar">'+(o.a?'<img src="'+escapeHtml(o.a)+'" alt="">':escapeHtml((o.n[0]||"W").toUpperCase()))+'</div><div class="membername">'+escapeHtml(o.n)+'</div><div class="dot"></div></div>'}).join("");
+el.innerHTML=h;
+}
+/* typing indicator + message chimes */
+function tick(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume();const t=audioCtx.currentTime,dest=(typeof master!=="undefined"&&master)?master:audioCtx.destination;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="sine";o.frequency.value=660;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.05,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.5);o.connect(g);g.connect(dest);o.start(t);o.stop(t+.55);}catch(e){}}
+/* soft mechanical typing clicks for the chat */
+let typeSoundOn=true;try{typeSoundOn=localStorage.getItem("hollownest_typesound")!=="0"}catch(e){}
+let lastTypeTick=0;
+function typeTick(){if(!typeSoundOn)return;const now=Date.now();if(now-lastTypeTick<45)return;lastTypeTick=now;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume();const t=audioCtx.currentTime,dest=(typeof master!=="undefined"&&master)?master:audioCtx.destination;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="triangle";o.frequency.value=1500+Math.random()*700;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.045,t+.005);g.gain.exponentialRampToValueAtTime(.0001,t+.04);o.connect(g);g.connect(dest);o.start(t);o.stop(t+.05);}catch(e){}}
+function toggleTypeSound(){typeSoundOn=!typeSoundOn;try{localStorage.setItem("hollownest_typesound",typeSoundOn?"1":"0")}catch(e){}showToast(typeSoundOn?"Typing clicks on.":"Typing clicks off.");const b=$("typeSndBtn");if(b)b.textContent="Typing clicks: "+(typeSoundOn?"on":"off");}
+let typingState=null,lastTypingSent=0,typewriterTimer=null,typeChars=0,typingFor="";
+function myTypingTo(){if(hallSelected)return "hall";if(friends[selected]&&friends[selected].id)return "dm:"+friends[selected].id;return null;}
+function noteTyping(){if(!presenceChannel||!sbUser)return;const to=myTypingTo();if(!to)return;const now=Date.now();if(now-lastTypingSent<3000)return;lastTypingSent=now;try{presenceChannel.send({type:"broadcast",event:"typing",payload:{from:sbUser.id,name:presencePayload().display_name,to:to,at:now}})}catch(e){}}
+function noteTypingStopped(){if(!presenceChannel||!sbUser)return;const to=myTypingTo();if(!to)return;try{presenceChannel.send({type:"broadcast",event:"typing-stop",payload:{from:sbUser.id,to:to}})}catch(e){}}
+function typingRelevant(st){if(!st)return false;if(hallSelected)return st.to==="hall";return !!(friends[selected]&&friends[selected].id&&st.to==="dm:"+friends[selected].id);}
+function renderTyping(){
+const el=$("typingEl");if(!el)return;
+const now=Date.now();
+let show=null;
+if(typingState&&(now-typingState.at)<6000&&typingRelevant(typingState))show="✎ "+typingState.name+" is typing";
+if(!show){el.innerHTML="";if(typewriterTimer){clearInterval(typewriterTimer);typewriterTimer=null;}typeChars=0;typingFor="";return;}
+if(typingFor!==show){if(typewriterTimer){clearInterval(typewriterTimer);typewriterTimer=null;}typeChars=0;typingFor=show;}
+if(typewriterTimer)return;
+typewriterTimer=setInterval(function(){
+if(!typingState||(Date.now()-typingState.at)>=6000||!typingRelevant(typingState)){clearInterval(typewriterTimer);typewriterTimer=null;const e2=$("typingEl");if(e2)e2.innerHTML="";typeChars=0;typingFor="";return;}
+typeChars++;
+const full="✎ "+typingState.name+" is typing";
+const e3=$("typingEl");if(e3)e3.innerHTML=escapeHtml(full.slice(0,typeChars))+'<span class="caret">▍</span>';
+if(typeChars>=full.length){clearInterval(typewriterTimer);typewriterTimer=null;setTimeout(function(){renderTyping();},1800);}
+},45);
+}
+function startTypingSweep(){if(window.__typingSweep)return;window.__typingSweep=setInterval(function(){try{renderTyping()}catch(e){}},2000);}
+function newsModal(){openOverlay('<h3>ANIMATION NEWS</h3><p style="color:#82969d">Tales from the wider Hollow Knight community.</p><div class="newsitem"><b>More tales surface soon</b><small>The nest is listening.</small></div><br><button class="primary" id="closeOvBtn">Return to HollowNest</button>');$("closeOvBtn").onclick=closeOverlay}
+function musicModal(){openOverlay('<h3>SOUNDTRACK // NEST HYMNS</h3><p style="color:#82969d">Original fan-made atmospheric instrumentals. Press play, pause anytime, or download.</p><div class="newsitem"><b>Lanterns Rest</b><small>lonely music-box piano + soft strings</small><br><audio controls preload="none" style="width:100%" src="https://user.uploads.dev/file/f01d3dd0603d478f64ab36eaa5a3742a.mp3"></audio><br><a class="link" href="https://user.uploads.dev/file/f01d3dd0603d478f64ab36eaa5a3742a.mp3" download>Download Lanterns Rest</a></div><br><div class="newsitem"><b>Deep Below</b><small>low cellos + sparse harp + distant choir</small><br><audio controls preload="none" style="width:100%" src="https://user.uploads.dev/file/a7558db6e804e3b87dd177ae2097a6d8.mp3"></audio><br><a class="link" href="https://user.uploads.dev/file/a7558db6e804e3b87dd177ae2097a6d8.mp3" download>Download Deep Below</a></div><br><div class="newsitem"><b>Mosslight</b><small>soft piano + warm strings + glass chimes</small><br><audio controls preload="none" style="width:100%" src="https://user.uploads.dev/file/70a2217718b6c0f853b6e0aca44fafd3.mp3"></audio><br><a class="link" href="https://user.uploads.dev/file/70a2217718b6c0f853b6e0aca44fafd3.mp3" download>Download Mosslight</a></div><br><div class="newsitem"><b>Pale Lanterns</b><small>gentle pipe-organ lullaby — hushed hymn over old stone · composed for the nest</small><br><audio controls preload="none" style="width:100%" src="https://user.uploads.dev/file/12a5645481b4830bf659a3d6089512b1.mp3"></audio><br><a class="link" href="https://user.uploads.dev/file/12a5645481b4830bf659a3d6089512b1.mp3" download>Download Pale Lanterns</a></div><br><div class="newsitem"><b>Deep Vesper</b><small>grand-but-gentle organ nocturne — theatrical arches gone soft · composed for the nest</small><br><audio controls preload="none" style="width:100%" src="https://user.uploads.dev/file/5dcc48e3b48d8bf4dd8ee2ab1531f8a8.mp3"></audio><br><a class="link" href="https://user.uploads.dev/file/5dcc48e3b48d8bf4dd8ee2ab1531f8a8.mp3" download>Download Deep Vesper</a></div><br><div class="newsitem"><b>Mosslight Reverie</b><small>airy organ flutes + glass chimes — morning light in the ruins · composed for the nest</small><br><audio controls preload="none" style="width:100%" src="https://user.uploads.dev/file/12550c294c5ea86f5a8f03b81f8bfceb.mp3"></audio><br><a class="link" href="https://user.uploads.dev/file/12550c294c5ea86f5a8f03b81f8bfceb.mp3" download>Download Mosslight Reverie</a></div><br><button class="primary" id="closeMusicBtn">Return</button>');$("closeMusicBtn").onclick=closeOverlay}
+function settingsModal(){openOverlay('<h3>SETTINGS</h3><div style="display:flex;gap:12px;align-items:center;margin:10px 0 4px"><div class="avatar" id="settingsAvatarEl" style="width:46px;height:46px;font-size:18px;flex:none">W</div><div><div id="settingsNameEl" style="font-size:14px">Wanderer</div><div style="font-size:10px;color:#7d9198;font-family:monospace;letter-spacing:.18em">PROFILE</div></div></div><button class="primary" id="editPicBtn" style="margin-top:10px">Edit profile picture</button> <button class="primary" id="editNameBtn">Edit name</button> <button class="primary" id="sndBtn">Toggle sound</button> <button class="primary" id="typeSndBtn">Typing clicks: on</button><br><br><div style="margin-top:6px;border-top:1px solid var(--line);padding-top:12px"><div style="font-size:10px;color:#7d9198;font-family:monospace;letter-spacing:.18em;margin-bottom:8px">OWNER ACCESS</div><div id="ownerZoneEl"></div></div><br><button class="danger" id="delProfileBtn">Delete profile</button> <button class="link" id="sbOutBtn">Sign out</button>');try{const nm=localStorage.getItem("hollownest_demo_user")||"Wanderer";$("settingsNameEl").textContent=nm;const av=getMyAvatar();$("settingsAvatarEl").innerHTML=av?'<img src="'+av+'" alt="me">':escapeHtml((nm[0]||"W").toUpperCase());}catch(e){}$("editPicBtn").onclick=()=>avatarModal();$("editNameBtn").onclick=()=>nameModal();$("sndBtn").onclick=()=>{toggleSound();};try{const tb=$("typeSndBtn");if(tb){tb.textContent="Typing clicks: "+(typeSoundOn?"on":"off");tb.onclick=()=>{toggleTypeSound();};}}catch(e){}$("sbOutBtn").onclick=async()=>{await logoutNest();closeOverlay()};if($("delProfileBtn"))$("delProfileBtn").onclick=deleteAccountModal;
+try{(function(){const z=$("ownerZoneEl");if(!z)return;if(isOwner()){z.innerHTML='<div style="font-size:13px;margin-bottom:8px">You are the Owner 🛡</div><button class="primary" id="ownerOpenBtn">Open Moderation Station</button>';$("ownerOpenBtn").onclick=()=>modModal();}else{z.innerHTML='<input id="ownerKeyInput" placeholder="Founder key" autocomplete="off"><br><br><button class="primary" id="ownerClaimBtn">Claim Owner</button>';$("ownerClaimBtn").onclick=claimOwner;}})();}catch(e){}}
+function updateClock(){$("clockEl").textContent=new Date().toLocaleString([],{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}
+function startAmbient(){if(soundOn)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume();master=master||audioCtx.createGain();master.gain.value=.035;master.connect(audioCtx.destination);[110,146.83,164.81,220].forEach((freq,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="sine";o.frequency.value=freq;g.gain.value=0;o.connect(g);g.connect(master);o.start();g.gain.linearRampToValueAtTime(.18,audioCtx.currentTime+2+i);setInterval(()=>{g.gain.cancelScheduledValues(audioCtx.currentTime);g.gain.linearRampToValueAtTime(.04,audioCtx.currentTime+1);g.gain.linearRampToValueAtTime(.15,audioCtx.currentTime+5)},7000+i*900)});soundOn=true;showToast("Ambient soundtrack enabled.")}catch(e){showToast("Sound needs interaction first.")}}
+function toggleSound(){if(!soundOn)startAmbient();else{try{master.gain.value=0}catch(e){}soundOn=false;showToast("Soundtrack muted.")}}
+$("enterBtn").onclick=loginNest;$("joinBtn").onclick=joinNest;
+$("loginPassInput").addEventListener("keydown",e=>{if(e.key==="Enter")loginNest()});$("loginNameInput").addEventListener("keydown",e=>{if(e.key==="Enter")loginNest()});setTimeout(()=>{try{$("loginNameInput").focus()}catch(e){}},400);showLogin();
+async function logoutNest(){try{await stopPresence()}catch(e){}try{if(sb)await sb.auth.signOut()}catch(e){}sbUser=null;backendOn=false;try{localStorage.removeItem("hollownest_demo_user");localStorage.removeItem("hollownest_local_session");}catch(e){}showLogin();$("welcomeEl").textContent="The lanterns are waiting.";showToast("Logged out.")}
+$("recoverBtn").onclick=async()=>{const c=backendCfg();const em=$("loginNameInput").value.trim();if(c.url&&sb!==null&&em.indexOf("@")>-1){try{await sb.auth.resetPasswordForEmail(em);$("authNote").textContent="Reset email sent."}catch(e){$("authNote").textContent="Reset failed."}return}if(c.url&&window.supabase&&em.indexOf("@")>-1){try{const t=window.supabase.createClient(c.url,c.key);await t.auth.resetPasswordForEmail(em);$("authNote").textContent="Reset email sent."}catch(e){$("authNote").textContent="Reset failed."}return}$("authNote").textContent="Enter your email above, then retry."};
+$("chatSendBtn").onclick=sendMessage;if($("chatTopBtn"))$("chatTopBtn").onclick=()=>{const el=$("chatlogEl");el.scrollTop=0;};if($("chatBottomBtn"))$("chatBottomBtn").onclick=()=>{const el=$("chatlogEl");el.scrollTop=el.scrollHeight;};
+$("chatInputEl").onkeydown=e=>{if(e.key==="Enter"){sendMessage();return}try{if((e.key&&e.key.length===1)||e.key==="Backspace")typeTick()}catch(x){}};
+if(!window.__typeSnd){window.__typeSnd=true;document.addEventListener("keydown",function(e){try{const t=e.target;if(!t||!t.id)return;if(t.id!=="msgEditArea"&&t.id!=="statusInputEl"&&t.id!=="boardEditArea")return;if((e.key&&e.key.length===1)||e.key==="Backspace")typeTick()}catch(x){}},true);}
+if($("chatInputEl")){$("chatInputEl").addEventListener("input",function(){try{noteTyping()}catch(e){}});$("chatInputEl").addEventListener("blur",function(){try{noteTypingStopped()}catch(e){}});}
+try{startTypingSweep()}catch(e){}
+$("statusChangeBtn").onclick=statusModal;if($("avatarChangeBtn"))$("avatarChangeBtn").onclick=avatarModal;if($("topAvatarEl"))$("topAvatarEl").onclick=avatarModal;if($("statusAvatarEl"))$("statusAvatarEl").onclick=avatarModal;
+$("statusNavBtn").onclick=statusModal;
+$("newsNavBtn").onclick=newsModal;
+if($("quizNavBtn"))$("quizNavBtn").onclick=openQuizModal;
+$("newsTileBtn").onclick=newsModal;
+if($("quizTileBtn"))$("quizTileBtn").onclick=openQuizModal;
+if($("quizStartBtn"))$("quizStartBtn").onclick=openQuizModal;
+if($("modNavBtn"))$("modNavBtn").onclick=modModal;
+if($("modTileBtn"))$("modTileBtn").onclick=modModal;
+$("soundNavBtn").onclick=musicModal;
+$("settingsNavBtn").onclick=settingsModal;
+$("logoutNavBtn").onclick=logoutNest;
+$("overlay").onclick=e=>{if(e.target===$("overlay"))closeOverlay()};
+$("holoToggleBtn").onclick=e=>{const off=document.body.classList.toggle("flat");e.target.textContent=off?"OFF":"ON"};
+Array.from(document.querySelectorAll("[data-open]")).forEach(b=>b.onclick=()=>window.open(b.dataset.open,"_blank","noopener,noreferrer"));
+(function init(){showLogin();try{const u=localStorage.getItem("hollownest_demo_user");if(u){$("loginNameInput").value=u;}const s=localStorage.getItem("hollownest_status");if(s)$("statusViewEl").textContent=s;try{echoes=JSON.parse(localStorage.getItem("hollownest_echoes")||"[]")}catch(e){echoes=[]}}catch(e){}try{applySiteConfig()}catch(e){}renderFriends();renderChat();renderEchoes();try{renderMyAvatar()}catch(e){}try{renderTrophyBoard()}catch(e){}try{renderOwnerUI()}catch(e){}try{renderMembers()}catch(e){}try{buildJoinGrid()}catch(e){}updateClock();setInterval(updateClock,30000);initBackend();
+const c=$("stars"),x=c.getContext("2d");let W,H,P=[];function rs(){W=c.width=c.offsetWidth;H=c.height=c.offsetHeight;P=Array.from({length:90},()=>({x:Math.random()*W,y:Math.random()*H,s:Math.random()*1.6+.4,v:Math.random()*.25+.05,o:Math.random()*.6+.2}))}rs();addEventListener("resize",rs);(function loop(){x.clearRect(0,0,W,H);for(const p of P){p.y-=p.v;if(p.y<-4){p.y=H+4;p.x=Math.random()*W}x.globalAlpha=p.o*(0.6+0.4*Math.sin(Date.now()/1000+p.x));x.fillStyle="#d5f7ff";x.fillRect(p.x,p.y,p.s,p.s)}x.globalAlpha=1;requestAnimationFrame(loop)})})();
+</script>
+<script>
+/* whisp-engine */
+
+(function(){
+var W=[
+{img:"https://user.uploads.dev/file/4f846cba8476c488f29b3e763cc81249.jpg",name:"Hornet",msg:"…little ghost. sit with me a while. the nest is quiet tonight."},
+{img:"https://user.uploads.dev/file/391b418c0181efb7be55bdc62f75510d.jpg",name:"Ghost",msg:"… … (a small nod, mask warm at the edges)"},
+{img:"https://user.uploads.dev/file/1fb8663de36d134bbeb24909d161bfdc.jpg",name:"Quirrel",msg:"All tragedy erased. I see only wonders."},
+{img:"https://user.uploads.dev/file/6823ea365796c457cd4f7201cb84d17d.jpg",name:"Grimm",msg:"a little bow, a little ember… the troupe keeps you warm."},
+{img:"https://user.uploads.dev/file/9f10201619e0380c3e3380f84df8e31f.jpg",name:"Hollow Knight",msg:"… … (a sealed hush, gentle, no pain in it tonight)"},
+{img:"https://user.uploads.dev/file/3122da4fa6467f8a7b939c633d4a2e38.jpg",name:"White Lady",msg:"…come closer, small root… be still. my bindings hold, and so may you."},
+{img:"https://user.uploads.dev/file/7ba55a5d906e3527f3e24424c35f3056.jpg",name:"Mantis Lords",msg:"wanderer. your stance improves. honour to you."},
+{img:"https://user.uploads.dev/file/12156967f9d7b269d8f89fea44331351.jpg",name:"Soul Master",msg:"ah… another scholar of the soul? sip slowly."},
+{img:"https://user.uploads.dev/file/9af23a73d616766ecebf5b24fedca952.jpg",name:"Nosk",msg:"…come closer… only to share the warm dark. promise."},
+{img:"https://user.uploads.dev/file/8a5ce7853280c60b8b65f3b781c43cf3.jpg",name:"Radiance",msg:"…dream soft, little one… just this once, a kind dream…"}
+];
+var k=0,on=true;
+function spawn(){
+if(!on||!document.body)return;
+try{var ap=document.getElementById('app');if(ap&&ap.hidden)return;}catch(e){}
+if(true){
+var w=W[k%W.length];k++;
+var d=document.createElement("div");
+d.className="whisp"+(Math.random()>0.5?" flip":"");
+var side=Math.random()>0.5?"left":"right";
+d.innerHTML='<img src="'+w.img+'" alt=""><div class="wm"><b>'+w.name+'</b><br>'+w.msg+'</div>';
+d.style[side]="-240px";
+d.style.top=(8+Math.random()*68)+"%";
+document.body.appendChild(d);
+window.__whisps=(window.__whisps||0)+1;
+setTimeout(function(){d.style.transition="left 7s ease-in-out,right 7s ease-in-out,opacity 2.5s ease";d.style.opacity="1";d.style[side]="26px";},60);
+setTimeout(function(){d.style.transition="left 6s ease-in-out,right 6s ease-in-out,opacity 3s ease";d.style[side]="-240px";d.style.opacity="0";setTimeout(function(){d.remove();},6500);},11500);
+}
+setTimeout(spawn,9000);
+}
+try{
+var ctl=document.querySelector(".holoCtl");
+if(ctl){var b=document.createElement("button");b.textContent="WHISPERS ON";b.onclick=function(){on=!on;b.textContent=on?"WHISPERS ON":"WHISPERS OFF";};ctl.appendChild(b);var s=document.createElement("button");s.textContent="STOP";s.onclick=function(){on=false;b.textContent="WHISPERS OFF";var w=document.querySelectorAll(".whisp");for(var i2=0;i2<w.length;i2++){w[i2].remove();}};ctl.appendChild(s);}
+}catch(e){}
+setTimeout(spawn,3500);
+window.__whispSpawn=spawn;
+})();
+</script>
+
+</body></html>
