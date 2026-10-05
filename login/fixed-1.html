@@ -1,0 +1,271 @@
+<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>HollowNest</title></head><body>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --holo:#bfe8ef; --holo-bright:#7df9ff; --line:rgba(190,220,230,.15);
+  --panel:rgba(11,17,24,.88); --panel2:rgba(16,24,32,.94);
+  --ink:#708090; --muted:#93a6af;
+}
+*{box-sizing:border-box}
+body{text-align:left;background:#05080c;color:var(--ink);font-family:Georgia,serif;margin:0;overflow:hidden}
+button,input,textarea{font:inherit}
+#scene{position:fixed;inset:0;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,rgba(100,142,160,.13),transparent 35%),radial-gradient(ellipse at 20% 80%,rgba(68,102,89,.14),transparent 35%),linear-gradient(#060a0f 0%,#0b1118 48%,#05080c 100%)}
+#stars{position:absolute;inset:0;opacity:.7}
+.ruin{position:absolute;bottom:-8vh;left:-5vw;width:110vw;height:38vh;opacity:.65;background:linear-gradient(160deg,transparent 20%,#101820 21% 34%,transparent 35%),linear-gradient(200deg,transparent 45%,#0c141b 46% 72%,transparent 73%);filter:blur(1px)}
+.lamp{position:absolute;width:10px;height:10px;border-radius:50%;background:#d9f4f0;box-shadow:0 0 18px 7px rgba(180,235,230,.45)}
+.l1{left:13%;top:24%}.l2{right:17%;top:31%}.l3{left:42%;bottom:17%}
+.gridfloor{position:absolute;left:-20vw;right:-20vw;bottom:-6vh;height:30vh;background:repeating-linear-gradient(90deg,transparent 0 59px,rgba(125,249,255,.07) 59px 60px),repeating-linear-gradient(0deg,transparent 0 29px,rgba(125,249,255,.07) 29px 30px);transform:perspective(600px) rotateX(62deg);opacity:.28;mask-image:linear-gradient(transparent,#000 40%)}
+.beam{position:absolute;left:50%;top:0;width:60vw;height:95vh;transform:translateX(-50%);background:linear-gradient(rgba(125,249,255,.06),transparent 70%);clip-path:polygon(42% 0,58% 0,95% 100%,5% 100%);pointer-events:none}
+.scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.18) 3px 4px)}
+.flick{position:absolute;inset:0;pointer-events:none;background:rgba(125,249,255,.025);animation:flick 5s infinite steps(60)}
+@keyframes flick{0%,100%{opacity:.6}8%{opacity:.25}9%{opacity:.65}43%{opacity:.2}44%{opacity:.6}}
+#app{position:relative;min-height:100vh;display:grid;grid-template-columns:210px minmax(0,1.6fr) minmax(0,0.95fr);gap:22px;padding:20px}
+#app[hidden]{display:none!important}
+.left{grid-column:1}.right{grid-column:2}.center{grid-column:3}
+.holo{background:var(--panel);border:1px solid var(--line);box-shadow:0 18px 60px rgba(0,0,0,.38),0 0 18px rgba(0,229,255,.08),inset 0 0 30px rgba(0,229,255,.04);backdrop-filter:blur(12px);position:relative;overflow:hidden}
+.holo:before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(125,249,255,.045) 3px 4px)}
+.holo:after{display:none}
+@keyframes sweep{to{transform:translateY(130vh)}}
+aside,.topbar,.hero,.tile,.card{border-radius:18px}
+aside{padding:18px;display:flex;flex-direction:column;min-height:0;min-width:0}
+.left nav{overflow:auto;min-height:0}
+.clip{clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
+.brand{display:flex;gap:12px;align-items:center;margin-bottom:20px}
+.mask{width:40px;height:40px;border-radius:50% 50% 44% 44%;background:linear-gradient(#e9f5f5,#a7c3c8);box-shadow:0 0 20px rgba(190,230,235,.25);position:relative;flex:none}
+.mask:after{content:"";position:absolute;left:8px;right:8px;bottom:8px;height:8px;border-radius:50%;background:#17242a}
+.brand h1{font-size:21px;margin:0;letter-spacing:.08em;font-weight:normal;text-shadow:0 0 12px rgba(125,249,255,.5)}
+.brand small{color:var(--muted);font-size:11px}
+nav{display:grid;gap:8px}
+.navbtn{background:transparent;border:1px solid transparent;color:#b8c9ce;text-align:left;padding:11px 12px;border-radius:12px;font-family:monospace;font-size:13px}
+.navbtn:hover,.navbtn.active{background:rgba(160,215,225,.08);border-color:var(--line);color:#fff;box-shadow:0 0 12px rgba(0,229,255,.18)}
+.quote{margin-top:auto;padding-top:14px;color:#738890;font-size:12px;line-height:1.5;font-style:italic;flex:none}
+.center{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;overflow:auto;padding-bottom:4px}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex:none;flex-wrap:wrap;gap:8px}
+.kicker{font-family:monospace;text-transform:uppercase;letter-spacing:.22em;color:#88aab3;font-size:11px}
+.clock{font-family:monospace;color:var(--muted);font-size:12px}
+.hero{padding:22px;flex:none}
+.hero h2{font-size:30px;font-weight:normal;margin:10px 0 8px;text-shadow:0 0 14px rgba(125,249,255,.4)}
+.hero p{color:#9eafb6;line-height:1.6;margin:0;font-size:13px}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;flex:none}
+.tile{padding:14px;min-height:84px;color:var(--ink);text-align:left;cursor:pointer}
+.tile:hover{transform:translateY(-2px);border-color:rgba(190,230,235,.3)}
+.tile .symbol{font-size:19px;color:var(--holo)}
+.tile b{display:block;margin-top:8px;font-size:13px}
+.tile span{font-size:11px;color:var(--muted);font-family:monospace}
+.feed{display:grid;gap:10px}
+.card{padding:16px;min-width:0}
+.card h3{margin:0 0 12px;font-size:11px;font-family:monospace;letter-spacing:.2em;color:#88aab3;font-weight:normal}
+.news{display:grid;gap:10px}
+.newsitem{padding:11px;border-radius:12px;background:rgba(255,255,255,.025);font-size:12px}
+.newsitem small{display:block;color:#74878e;margin-top:5px}
+.right{display:flex;flex-direction:column;min-height:0;min-width:0}
+.chatCore{flex:1;display:flex;flex-direction:column;min-height:0}
+.friendlist{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-y:auto;overflow-x:hidden;max-height:232px;padding:2px 4px 2px 2px;flex:none;scrollbar-width:thin}
+.friend{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px;border-radius:14px;background:rgba(255,255,255,.025);border:1px solid transparent;color:var(--ink);text-align:left;min-width:0}
+.friend.selected,.friend:hover{border-color:var(--line);background:rgba(150,220,225,.07)}
+.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:bold;color:#dceff1;background:radial-gradient(circle at 35% 30%,#a9d3d7,#293b42 58%,#11191e);box-shadow:inset 0 0 0 1px rgba(255,255,255,.15),0 0 10px rgba(125,249,255,.35);overflow:hidden;padding:0;flex:none}
+.avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.friendname{font-size:13px}.statusline{font-size:10px;color:#71858c;font-family:monospace;margin-top:2px}
+.dot{width:7px;height:7px;border-radius:50%;background:#77949b}.online .dot{background:#a8d8cf;box-shadow:0 0 8px #a8d8cf}
+.chatbox{margin-top:12px;border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;flex:1;min-height:0}
+.chatlog{flex:1;min-height:320px;max-height:48vh;overflow:auto;display:grid;align-content:start;gap:12px;padding:4px 6px 4px 2px}
+.msg{font-size:12.5px;line-height:1.6;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(125,249,255,.1);max-width:92%}
+.msg.me{margin-left:auto;background:rgba(150,220,225,.1)}
+.msg small{display:block;color:#71858c;margin-top:3px;font-family:monospace;font-size:10px}
+.chatrow{display:flex;gap:8px;margin-top:10px}
+/* FIX: login gates first, titles get breathing room, no card overlap */
+#login{z-index:50;background:rgba(4,7,11,.97)}
+#login .modal{margin:0}
+.chatCore h3{margin:4px 0 14px!important}
+.chatbox > div:first-child,.echoes > div:first-child{margin-bottom:10px!important;letter-spacing:.18em}
+.friend > div:nth-child(2){min-width:0}
+.friendname,.statusline{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.statusline{margin-top:4px!important}
+.echo{line-height:1.55}
+.chatrow{margin-top:10px}
+.echoRow{margin-top:2px}
+.chatrow input,.modal input,.modal textarea,#echoInput{width:100%;background:#080e13;color:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;outline:none;font-family:monospace;font-size:12px}
+.send,.primary{border:1px solid rgba(180,230,235,.25);background:rgba(160,220,225,.12);color:#e9f6f7;border-radius:10px;padding:10px 14px}
+.link{background:none;border:0;color:#9fcbd1;font-size:12px;padding:8px 0;font-family:monospace}
+.echoes{margin-top:16px;border-top:1px solid var(--line);padding-top:14px;flex:none}
+.echoList{display:grid;gap:10px;max-height:160px;overflow:auto;margin-bottom:10px;padding-right:2px}
+.echo{font-size:12px;background:rgba(125,249,255,.05);border:1px solid rgba(125,249,255,.1);border-radius:10px;padding:8px 10px}
+.echo small{display:block;color:var(--muted);font-family:monospace;font-size:10px;margin-top:3px}
+.echoRow{display:flex;gap:7px}
+#login{position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:rgba(3,6,9,.82);backdrop-filter:blur(10px)}
+.modal{width:min(430px,calc(100vw - 34px));padding:28px;border-radius:18px}
+.modal h2{font-weight:normal;margin:0 0 7px;font-size:30px}
+.modal p{color:var(--muted);font-size:13px;line-height:1.5}
+.form{display:grid;gap:10px;margin-top:16px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 16px;border:1px solid var(--line);background:#101920ee;border-radius:12px;color:#cce8eb;opacity:0;pointer-events:none;transition:.25s;z-index:30;font-family:monospace}
+#toast.show{opacity:1}
+.overlay{position:fixed;inset:0;z-index:20;display:none;place-items:center;background:rgba(3,6,9,.72)}
+.overlay .card{width:min(600px,calc(100vw - 30px));max-height:80vh;overflow:auto}
+.holoCtl{font-family:monospace;font-size:11px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.holoCtl button{background:rgba(125,249,255,.08);border:1px solid var(--line);color:var(--holo);border-radius:8px;padding:4px 10px;font-family:monospace;font-size:11px}
+body.flat .holo:before,body.flat .flick,body.flat .holo:after{display:none}
+body.flat .gridfloor,body.flat .beam{opacity:.08}
+@media(max-width:1050px){body{overflow:auto}#app{grid-template-columns:180px minmax(0,1fr);height:auto;min-height:100vh}.left{grid-column:1;grid-row:1 / span 2}.right{grid-column:2;grid-row:1}.center{grid-column:2;grid-row:2}.tiles{grid-template-columns:repeat(2,1fr)}.friendlist{grid-template-columns:repeat(2,minmax(0,1fr))}.chatlog{min-height:260px;max-height:60vh}}
+@media(max-width:720px){body{overflow:auto}#app{height:auto;min-height:100vh;grid-template-columns:minmax(0,1fr)}.left{display:none}.right{grid-column:1;grid-row:1}.center{grid-column:1;grid-row:2}.friendlist{grid-template-columns:repeat(2,minmax(0,1fr))}.chatlog{min-height:340px;max-height:none}}
+</style>
+<style>
+
+body{font-family:'Space Mono',Georgia,monospace;}
+#scene{background:radial-gradient(ellipse at 50% 30%,rgba(120,60,180,.16),transparent 40%),radial-gradient(ellipse at 20% 80%,rgba(0,229,255,.08),transparent 35%),linear-gradient(#0d0614 0%,#150926 55%,#0d0614 100%);}
+.holo{background:rgba(20,10,40,.9);border:2px solid #bf40bf;box-shadow:5px 5px 0 rgba(0,229,255,.55),0 0 22px rgba(191,64,191,.25);}
+.kicker{color:#00e5ff;text-shadow:2px 2px #bf40bf;}
+.navbtn,.tile span,.clock,.statusline,.holoCtl,.link{font-family:'Space Mono',monospace;}
+.navbtn:hover,.navbtn.active{box-shadow:0 0 12px rgba(0,229,255,.4);}
+.whisp{position:fixed;z-index:8;pointer-events:none;opacity:0;width:150px;}
+.whisp img{width:130px;height:130px;object-fit:cover;border:2px solid #00e5ff;box-shadow:4px 4px 0 #bf40bf;display:block;}
+.whisp.flip img{border-color:#bf40bf;box-shadow:4px 4px 0 #00e5ff;}
+.whisp .wm{font-family:'Space Mono',monospace;font-size:10px;line-height:1.5;color:#e0d8f0;background:rgba(20,10,40,.94);border-left:3px solid #bf40bf;padding:6px 8px;margin-top:6px;max-width:200px;}
+.whisp .wm b{color:#00e5ff;}
+</style>
+<div id="scene"><canvas id="stars"></canvas><div class="ruin"></div><div class="lamp l1"></div><div class="lamp l2"></div><div class="lamp l3"></div><div class="gridfloor"></div><div class="beam"></div><div class="flick"></div><div class="scan"></div></div>
+<div id="login"><div class="scan"></div><div class="modal holo clip"><div class="kicker">A quiet place beneath the earth</div><h2>HollowNest</h2><p>Members only. Log in or join with your email to enter the nest.</p><div class="form"><input id="loginNameInput" placeholder="Email" autocomplete="username"><input id="loginPassInput" placeholder="Password" type="password" autocomplete="current-password"><button class="primary" id="enterBtn">Log In</button><button class="primary" id="joinBtn">Join the Nest</button><button class="link" id="recoverBtn">Forgot password?</button><button class="link" id="offlineBtn" type="button">Continue offline &rarr;</button></div><p id="authNote"></p></div></div>
+<div id="app" hidden>
+<aside class="holo clip left"><div class="brand"><div class="mask"></div><div><h1>HollowNest</h1><small>your little corner</small></div></div>
+<nav>
+<button class="navbtn active">⌂ Home</button>
+<button class="navbtn" data-open="https://www.youtube.com/">◉ YouTube</button>
+<button class="navbtn" data-open="https://www.tumblr.com/">✦ Tumblr</button>
+<button class="navbtn" data-open="https://www.instagram.com/">◎ Instagram</button>
+<button class="navbtn" id="newsNavBtn">✧ Animation News</button>
+<button class="navbtn" id="soundNavBtn">♫ Soundtrack</button>
+<button class="navbtn" id="statusNavBtn">✎ My Status</button>
+<button class="navbtn" id="settingsNavBtn">⚙ Settings</button>
+<button class="navbtn" id="logoutNavBtn">⏻ Log out</button>
+</nav><div class="quote">“No cost too great.”<br><span>— HollowNest, a private fan project<br>Not affiliated with Team Cherry or Hollow Knight.</span></div></aside>
+<aside class="holo clip right"><div class="chatCore"><h3 style="font-family:monospace;letter-spacing:.2em;font-size:11px;color:#88aab3;margin:2px 0 12px">YOUR TEN // MIDDLE NEST</h3><div class="friendlist" id="friendlistEl"></div><div class="chatbox"><div style="font-size:11px;color:#7d9198;font-family:monospace;margin-bottom:7px">CHAT WITH <span id="chatWithEl">Hornet</span></div><div class="chatlog" id="chatlogEl"></div><div class="chatrow"><input id="chatInputEl" placeholder="leave a little message…"><button class="send" id="chatSendBtn">↗</button></div></div><div class="echoes"><div style="font-size:11px;color:#7d9198;font-family:monospace;margin-bottom:7px">ECHOES // NEST COMMENTS</div><div class="echoList" id="echoListEl"></div><div class="echoRow"><input id="echoInput" placeholder="leave an echo for the nest…"><button class="send" id="echoBtn">✦</button></div></div></div></aside>
+<main class="center"><div class="holo topbar clip"><div class="kicker">Hallownest / private desktop</div><div style="display:flex;gap:12px;align-items:center"><div class="holoCtl"><span>HOLO</span><button id="holoToggleBtn">ON</button></div><div class="clock" id="clockEl"></div></div></div>
+<section class="holo hero clip"><div class="kicker">Good evening, wanderer.</div><h2 id="welcomeEl">The lanterns are waiting.</h2><p>Your personal corner for music, friends, animation news, and the places you visit most — now soul-light over old stone. Same kingdom, new shimmer.</p></section>
+<section class="tiles">
+<button class="holo tile clip" data-open="https://www.youtube.com/"><div class="symbol">◉</div><b>YouTube</b><span>watch &amp; wander</span></button>
+<button class="holo tile clip" data-open="https://www.tumblr.com/"><div class="symbol">✦</div><b>Tumblr</b><span>quiet discoveries</span></button>
+<button class="holo tile clip" data-open="https://www.instagram.com/"><div class="symbol">◎</div><b>Instagram</b><span>people &amp; places</span></button>
+<button class="holo tile clip" id="newsTileBtn"><div class="symbol">✧</div><b>Animation News</b><span>latest stories</span></button>
+</section>
+<section class="feed"><div class="holo card clip"><h3>NOTICE BOARD</h3><div class="news"><div class="newsitem"><b>Animation news will live here</b><small>Connect an RSS source in the next build.</small></div><div class="newsitem"><b>Your status can appear here</b><small>Post something for your ten to see.</small></div><div class="newsitem"><b>Projection over ruins stable</b><small>Old stone, new light — 87% clarity.</small></div></div></div>
+<div class="holo card clip"><h3>MY STATUS</h3><div id="statusViewEl" style="color:#a9b8bd;font-size:13px;line-height:1.6">The kingdom is quiet tonight.</div><button class="link" id="statusChangeBtn">Change status →</button></div></section></main>
+</div>
+<div id="overlay" class="overlay"><div class="holo card clip" id="overlayCardEl"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>window.HOLLOWNEST_SUPABASE={url:"https://xzhsscjdaffzldnqwpxl.supabase.co",publishableKey:"sb_publishable_2kgs2eC5z4W0LxOo0qe5WQ_5UJAcBB7"};</script>
+<div id="toast"></div>
+<script>
+const friends=[{name:"Hornet",avatar:"H",img:"https://user.uploads.dev/file/4f846cba8476c488f29b3e763cc81249.jpg",trait:"Fierce protector - sharp-witted",online:true},{name:"Ghost",avatar:"G",img:"https://user.uploads.dev/file/391b418c0181efb7be55bdc62f75510d.jpg",trait:"Silent wanderer - curious",online:true},{name:"Quirrel",avatar:"Q",img:"https://user.uploads.dev/file/0e98d9ff40f57c247f96ff17d00753d5.jpg",trait:"Cheerful explorer - loyal",online:true},{name:"Grimm",avatar:"G",img:"https://user.uploads.dev/file/6823ea365796c457cd4f7201cb84d17d.jpg",trait:"Theatrical ritualist - hungry",online:true},{name:"Hollow Knight",avatar:"H",img:"https://user.uploads.dev/file/9f10201619e0380c3e3380f84df8e31f.jpg",trait:"Mournful vessel - dutiful",online:false},{name:"Pure Vessel",avatar:"P",img:"https://user.uploads.dev/file/755ebcc60dce8baaef2ccc020a66f430.jpg",trait:"Pristine grace - focused",online:true},{name:"Mantis Lords",avatar:"M",img:"https://user.uploads.dev/file/7ba55a5d906e3527f3e24424c35f3056.jpg",trait:"Proud warriors - honorable",online:true},{name:"Soul Master",avatar:"S",img:"https://user.uploads.dev/file/12156967f9d7b269d8f89fea44331351.jpg",trait:"Arrogant scholar - obsessive",online:false},{name:"Nosk",avatar:"N",img:"https://user.uploads.dev/file/9af23a73d616766ecebf5b24fedca952.jpg",trait:"Patient mimic - lurking",online:false},{name:"Radiance",avatar:"R",img:"https://user.uploads.dev/file/8a5ce7853280c60b8b65f3b781c43cf3.jpg",trait:"Radiant light - prideful",online:true}];
+let selected=0,messages={0:[["Hornet","Come, little ghost. The middle nest suits you.",false],["You","I finally got the little desktop working.",true]]};
+let echoes=[];
+let audioCtx=null,master=null,soundOn=false;
+const $=id=>document.getElementById(id);
+function showApp(){const a=$("app");if(a)a.hidden=false;const l=$("login");if(l)l.style.display="none";}
+function showLogin(){$("login").style.display="grid";const a=$("app");if(a)a.hidden=true;}
+function enterOffline(){let name="Wanderer";try{const em=$("loginNameInput").value.trim();if(em.indexOf("@")>0)name=em.split("@")[0];else if(em)name=em;localStorage.setItem("hollownest_demo_user",name);localStorage.setItem("hollownest_local_session","1");}catch(e){}$("welcomeEl").textContent="Welcome, "+name+".";showApp();try{renderFriends();renderChat();renderEchoes();}catch(e){}showToast("Entered offline. Progress stays on this device.");}
+function showToast(t){const e=$("toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2200)}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+let sb=null,sbUser=null,backendOn=false;
+function backendCfg(){const fb={url:"https://xzhsscjdaffzldnqwpxl.supabase.co",key:"sb_publishable_2kgs2eC5z4W0LxOo0qe5WQ_5UJAcBB7"};try{const project=window.HOLLOWNEST_SUPABASE||{};return{url:localStorage.getItem("hn_sb_url")||project.url||fb.url,key:localStorage.getItem("hn_sb_key")||project.publishableKey||fb.key}}catch(e){const project=window.HOLLOWNEST_SUPABASE||{};return{url:project.url||fb.url,key:project.publishableKey||fb.key}}}
+function dispName(u){if(!u)return"Wanderer";if(u.user_metadata&&u.user_metadata.display_name)return u.user_metadata.display_name;if(u.email)return u.email.split("@")[0];return"Wanderer"}
+async function initBackend(){const c=backendCfg();if(!c.url||!c.key||!window.supabase)return;try{sb=window.supabase.createClient(c.url,c.key);const session=await sb.auth.getSession();sbUser=session.data&&session.data.session?session.data.session.user:null;if(sbUser){backendOn=true;await afterBackendLogin(true)}sb.auth.onAuthStateChange(async(ev,sess)=>{sbUser=sess?sess.user:null;backendOn=!!sbUser;if(sbUser)await afterBackendLogin(false)});subscribeRealtime()}catch(e){sb=null;showToast("Supabase connection unavailable; local mode is active.")}}
+
+function subscribeRealtime(){if(!sb)return;try{sb.channel("hollownest-live").on("postgres_changes",{event:"INSERT",schema:"public",table:"messages"},async payload=>{if(payload.new&&sbUser&&(payload.new.sender_id===sbUser.id||payload.new.recipient_id===sbUser.id)){await loadChat()}}).on("postgres_changes",{event:"INSERT",schema:"public",table:"status_posts"},()=>loadEchoes()).subscribe()}catch(e){}}
+
+async function afterBackendLogin(silent){const n=dispName(sbUser);try{localStorage.setItem("hollownest_demo_user",n)}catch(e){}showApp();$("welcomeEl").textContent=(silent?"Welcome back, ":"Welcome, ")+n+".";await ensureProfile();await loadProfile();await loadFriends();await loadChat();await loadEchoes();startAmbient();if(!silent)showToast("Welcome home.")}
+
+async function ensureProfile(){if(!sb||!sbUser)return;const meta=sbUser.user_metadata||{};const username=(sbUser.email?sbUser.email.split("@")[0]:"wanderer").replace(/[^a-zA-Z0-9_]/g,"").slice(0,40)||("wanderer_"+sbUser.id.slice(0,8));const display=meta.display_name||dispName(sbUser);try{const r=await sb.from("profiles").select("id").eq("id",sbUser.id).maybeSingle();if(!r.data)await sb.from("profiles").insert({id:sbUser.id,username,display_name:display,avatar_id:1})}catch(e){}}
+
+async function loadProfile(){if(!sb||!sbUser)return;try{const r=await sb.from("profiles").select("display_name,status_text").eq("id",sbUser.id).single();if(r.data){$("statusViewEl").textContent=r.data.status_text||"The kingdom is quiet tonight.";$('welcomeEl').textContent="Welcome, "+(r.data.display_name||dispName(sbUser))+"."}}catch(e){}}
+
+async function loadFriends(){if(!sb||!sbUser)return;try{const r=await sb.from("friendships").select("friend_id,profiles:friend_id(id,display_name,avatar_id)").eq("user_id",sbUser.id);if(r.data&&r.data.length){friends.splice(0,friends.length,...r.data.slice(0,10).map((x,i)=>({id:x.profiles.id,name:x.profiles.display_name||"Friend "+(i+1),avatar:String(x.profiles.avatar_id||i+1),online:true})));if(selected>=friends.length)selected=0;renderFriends();$("chatWithEl").textContent=friends[selected]?.name||"friend"}}catch(e){}}
+
+async function loadChat(){if(!sb||!sbUser||!friends[selected]?.id)return;const id=friends[selected].id;try{const r=await sb.from("messages").select("sender_id,recipient_id,body,created_at").or("and(sender_id.eq."+sbUser.id+",recipient_id.eq."+id+"),and(sender_id.eq."+id+",recipient_id.eq."+sbUser.id+")").order("created_at",{ascending:true}).limit(100);if(r.data){messages[selected]=r.data.map(m=>[m.sender_id===sbUser.id?"You":friends[selected].name,m.body,m.sender_id===sbUser.id,m.created_at]);renderChat()}}catch(e){}}
+
+async function loadEchoes(){if(!sb)return;try{const r=await sb.from("status_posts").select("id,body,created_at,profiles:author_id(display_name)").order("created_at",{ascending:true}).limit(60);if(r.data){echoes=r.data.map(x=>({t:x.body,w:x.profiles?.display_name||"Wanderer",id:x.id}));renderEchoes()}}catch(e){}}
+
+let dotTimer=null;function setButtons(dis){try{if(!dis&&dotTimer){clearInterval(dotTimer);dotTimer=null}$("enterBtn").disabled=dis;if($("joinBtn"))$("joinBtn").disabled=dis;$("enterBtn").style.opacity=dis?.55:1;if($("joinBtn"))$("joinBtn").style.opacity=dis?.55:1}catch(e){}}function busyNote(t){const el=$("authNote");let d=0;el.textContent=t;if(dotTimer)clearInterval(dotTimer);dotTimer=setInterval(()=>{const ell=$("authNote");d=(d+1)%4;ell.textContent=t+".".repeat(d)},450);setButtons(true)}function idleNote(t){if(dotTimer){clearInterval(dotTimer);dotTimer=null}if(t!==undefined&&t!==null)$("authNote").textContent=t;setButtons(false)}function lanternRace(p,ms){return Promise.race([p.then(r=>({ok:true,r}),e=>({ok:false,r:e})),new Promise(res=>setTimeout(()=>res({ok:false,slow:true}),ms))])}
+async function ensureSb(){if(!window.supabase)return null;const c=backendCfg();if(!c.url||!c.key)return null;if(!sb){try{sb=window.supabase.createClient(c.url,c.key)}catch(e){return null}}return sb}
+async function loginNest(){const em=$("loginNameInput").value.trim();const pw=$("loginPassInput").value;if(em.indexOf("@")<0||!pw){$("authNote").textContent="Enter your email and password.";return}const s=await ensureSb();if(!s){$("authNote").textContent="Membership service unreachable. You can still Continue offline below.";return}busyNote("Checking the lanterns");try{const o=await lanternRace(s.auth.signInWithPassword({email:em,password:pw}),25000);if(o.slow||!o.r){idleNote("The lanterns are slow to answer. Wait a moment, then retry.");return}const r=o.r;if(r.error){idleNote(r.error.message);return}sbUser=r.data.user;backendOn=true;await afterBackendLogin(false);setButtons(false)}catch(e){idleNote("Login failed. Try again.")}}
+async function joinNest(){const em=$("loginNameInput").value.trim();const pw=$("loginPassInput").value;if(em.indexOf("@")<0||!pw){$("authNote").textContent="Enter an email and a password to join.";return}if(pw.length<6){$("authNote").textContent="Password needs at least 6 characters.";return}const s=await ensureSb();if(!s){$("authNote").textContent="Membership service unreachable. You can still Continue offline below.";return}busyNote("Lighting your lantern");try{const o=await lanternRace(s.auth.signUp({email:em,password:pw,options:{data:{display_name:em.split("@")[0]},emailRedirectTo:location.href}}),25000);if(o.slow||!o.r){idleNote("The lanterns are slow to answer. Your request may still land — wait a moment, then log in.");return}const up=o.r;if(up.error){const m=up.error.message||"Join failed.";idleNote(/already registered/i.test(m)?"That email already joined. Click Log In instead.":m);return}if(!up.data.session){idleNote("Lantern lit. Confirm your email, then log in.");return}sbUser=up.data.session.user;backendOn=true;try{await s.from("profiles").select("id").eq("id",sbUser.id).limit(1)}catch(e){}await afterBackendLogin(false);setButtons(false)}catch(e){idleNote("Join failed. Try again.")}}
+
+function renderFriends(){$("friendlistEl").innerHTML=friends.length?friends.map((f,i)=>'<button class="friend '+(i===selected?"selected":"")+' '+(f.online?"online":"")+'" data-i="'+i+'" title="'+escapeHtml(f.trait||f.name)+'"><div class="avatar">'+(f.img?'<img src="'+f.img+'" alt="">':escapeHtml(f.avatar))+'</div><div><div class="friendname">'+escapeHtml(f.name)+'</div><div class="statusline">'+(escapeHtml(f.trait||"Bound ally")+" · "+(f.online?"online":"away"))+'</div></div><div class="dot"></div></button>').join(""):'<div style="grid-column:1/-1;color:#71858c;font-size:12px;padding:8px">No friends are connected yet. Add friendships in Supabase to populate your ten.</div>';Array.from(document.querySelectorAll(".friend")).forEach(b=>b.onclick=()=>selectFriend(Number(b.dataset.i)))}
+function selectFriend(i){selected=i;$('chatWithEl').textContent=friends[i]?.name||"friend";renderFriends();renderChat();if(backendOn)loadChat()}
+function renderChat(){const arr=messages[selected]||[];$("chatlogEl").innerHTML=arr.map(m=>'<div class="msg '+(m[2]?"me":"")+'"><b>'+escapeHtml(m[2]?"You":m[0])+'</b><br>'+escapeHtml(m[1])+"<small>"+(m[3]?new Date(m[3]).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}):"now")+'</small></div>').join("")||'<div style="color:#71858c;font-size:12px">No messages yet. Leave the first little note.</div>';const el=$("chatlogEl");el.scrollTop=el.scrollHeight}
+async function sendMessage(){const inp=$("chatInputEl"),v=inp.value.trim();if(!v||!friends[selected])return;if(backendOn&&sb&&sbUser&&friends[selected].id){try{const r=await sb.from("messages").insert({sender_id:sbUser.id,recipient_id:friends[selected].id,body:v});if(r.error){showToast(r.error.message);return}inp.value="";await loadChat();return}catch(e){}}(messages[selected]=messages[selected]||[]).push(["You",v,true]);inp.value="";renderChat()}
+function renderEchoes(){$("echoListEl").innerHTML=echoes.map(e=>'<div class="echo">'+escapeHtml(e.t)+'<small>'+escapeHtml(e.w)+" · "+(e.id?"posted":"local")+'</small></div>').join("")||'<div style="color:#71858c;font-size:12px">No echoes yet. Leave the first one.</div>';const el=$("echoListEl");el.scrollTop=el.scrollHeight}
+async function postEcho(){const v=$("echoInput").value.trim();if(!v)return;let who="Wanderer";try{who=localStorage.getItem("hollownest_demo_user")||"Wanderer"}catch(e){}if(backendOn&&sb&&sbUser){try{const r=await sb.from("status_posts").insert({author_id:sbUser.id,body:v}).select("id,body,created_at").single();if(r.error){showToast(r.error.message);return}$("echoInput").value="";await loadEchoes();showToast("Echo left.");return}catch(e){}}echoes.push({t:v,w:who});try{localStorage.setItem("hollownest_echoes",JSON.stringify(echoes))}catch(e){}$("echoInput").value="";renderEchoes();showToast("Echo left.")}
+function openOverlay(h){$("overlayCardEl").innerHTML=h;$("overlay").style.display="grid"}
+function closeOverlay(){$("overlay").style.display="none"}
+function statusModal(){openOverlay('<h3>MY STATUS</h3><p style="color:#82969d">Write a small note for your friends.</p><textarea id="statusInputEl" rows="5">'+escapeHtml($("statusViewEl").textContent)+'</textarea><br><button class="primary" style="margin-top:10px" id="postStatusBtn">Post status</button>');$("postStatusBtn").onclick=saveStatus}
+async function saveStatus(){const v=$("statusInputEl").value.trim();if(v){$("statusViewEl").textContent=v;try{localStorage.setItem("hollownest_status",v)}catch(e){}if(backendOn&&sb&&sbUser){try{await sb.from("profiles").update({status_text:v}).eq("id",sbUser.id);await sb.from("status_posts").insert({author_id:sbUser.id,body:v})}catch(e){}}}closeOverlay();showToast("Status posted.")}
+function newsModal(){openOverlay('<h3>ANIMATION NEWS</h3><p style="color:#82969d">Finished version can connect to RSS/news.</p><div class="newsitem"><b>News source placeholder</b><small>Choose sources in the next build.</small></div><br><button class="primary" id="closeOvBtn">Return to HollowNest</button>');$("closeOvBtn").onclick=closeOverlay}
+function musicModal(){openOverlay('<h3>SOUNDTRACK // NEST ECHOES</h3><p style="color:#82969d">Original fan-made atmospheric instrumentals. Press play, pause anytime, or download.</p><div class="newsitem"><b>Lanterns Rest</b><small>lonely music-box piano + soft strings</small><br><audio controls preload="none" style="width:100%" src="https://user.uploads.dev/file/f01d3dd0603d478f64ab36eaa5a3742a.mp3"></audio><br><a class="link" href="https://user.uploads.dev/file/f01d3dd0603d478f64ab36eaa5a3742a.mp3" download>Download Lanterns Rest</a></div><br><div class="newsitem"><b>Deep Below</b><small>low cellos + sparse harp + distant choir</small><br><audio controls preload="none" style="width:100%" src="https://user.uploads.dev/file/a7558db6e804e3b87dd177ae2097a6d8.mp3"></audio><br><a class="link" href="https://user.uploads.dev/file/a7558db6e804e3b87dd177ae2097a6d8.mp3" download>Download Deep Below</a></div><br><div class="newsitem"><b>Mosslight</b><small>soft piano + warm strings + glass chimes</small><br><audio controls preload="none" style="width:100%" src="https://user.uploads.dev/file/70a2217718b6c0f853b6e0aca44fafd3.mp3"></audio><br><a class="link" href="https://user.uploads.dev/file/70a2217718b6c0f853b6e0aca44fafd3.mp3" download>Download Mosslight</a></div><br><button class="primary" id="closeMusicBtn">Return</button>');$("closeMusicBtn").onclick=closeOverlay}
+function settingsModal(){const c=backendCfg();openOverlay('<h3>SETTINGS</h3><p style="color:#82969d">Backend: '+(c.url?"Supabase configured":"local demo")+'</p><input id="sbUrlInput" placeholder="Supabase URL" value="'+escapeHtml(c.url)+'"><br><br><input id="sbKeyInput" placeholder="Supabase anon key" value="'+escapeHtml(c.key)+'"><br><br><button class="primary" id="sbSaveBtn">Save backend</button> <button class="primary" id="sndBtn">Toggle sound</button><br><br><button class="link" id="sbOutBtn">Sign out</button> <button class="link" id="resetBtn">Reset local prototype</button>');$("sndBtn").onclick=()=>{toggleSound();closeOverlay()};$("sbSaveBtn").onclick=()=>{try{localStorage.setItem("hn_sb_url",$("sbUrlInput").value.trim());localStorage.setItem("hn_sb_key",$("sbKeyInput").value.trim())}catch(e){}closeOverlay();showToast("Backend saved.");setTimeout(()=>location.reload(),600)};$("sbOutBtn").onclick=async()=>{await logoutNest();closeOverlay()};$("resetBtn").onclick=()=>{try{["hn_sb_url","hn_sb_key","hollownest_demo_user","hollownest_status","hollownest_echoes"].forEach(k=>localStorage.removeItem(k))}catch(e){}location.reload()}}
+function updateClock(){$("clockEl").textContent=new Date().toLocaleString([],{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}
+function startAmbient(){if(soundOn)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume();master=master||audioCtx.createGain();master.gain.value=.035;master.connect(audioCtx.destination);[110,146.83,164.81,220].forEach((freq,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="sine";o.frequency.value=freq;g.gain.value=0;o.connect(g);g.connect(master);o.start();g.gain.linearRampToValueAtTime(.18,audioCtx.currentTime+2+i);setInterval(()=>{g.gain.cancelScheduledValues(audioCtx.currentTime);g.gain.linearRampToValueAtTime(.04,audioCtx.currentTime+1);g.gain.linearRampToValueAtTime(.15,audioCtx.currentTime+5)},7000+i*900)});soundOn=true;showToast("Ambient soundtrack enabled.")}catch(e){showToast("Sound needs interaction first.")}}
+function toggleSound(){if(!soundOn)startAmbient();else{try{master.gain.value=0}catch(e){}soundOn=false;showToast("Soundtrack muted.")}}
+$("enterBtn").onclick=loginNest;$("joinBtn").onclick=joinNest;if($("offlineBtn"))$("offlineBtn").onclick=enterOffline;
+$("loginPassInput").addEventListener("keydown",e=>{if(e.key==="Enter")loginNest()});$("loginNameInput").addEventListener("keydown",e=>{if(e.key==="Enter")loginNest()});setTimeout(()=>{try{$("loginNameInput").focus()}catch(e){}},400);showLogin();
+async function logoutNest(){try{if(sb)await sb.auth.signOut()}catch(e){}sbUser=null;backendOn=false;try{localStorage.removeItem("hollownest_demo_user");localStorage.removeItem("hollownest_local_session");}catch(e){}showLogin();$("welcomeEl").textContent="The lanterns are waiting.";showToast("Logged out.")}
+$("recoverBtn").onclick=async()=>{const c=backendCfg();const em=$("loginNameInput").value.trim();if(c.url&&sb!==null&&em.indexOf("@")>-1){try{await sb.auth.resetPasswordForEmail(em);$("authNote").textContent="Reset email sent."}catch(e){$("authNote").textContent="Reset failed."}return}if(c.url&&window.supabase&&em.indexOf("@")>-1){try{const t=window.supabase.createClient(c.url,c.key);await t.auth.resetPasswordForEmail(em);$("authNote").textContent="Reset email sent."}catch(e){$("authNote").textContent="Reset failed."}return}$("authNote").textContent="Enter your email above, then retry."};
+$("chatSendBtn").onclick=sendMessage;
+$("chatInputEl").onkeydown=e=>{if(e.key==="Enter")sendMessage()};
+$("echoBtn").onclick=postEcho;
+$("echoInput").onkeydown=e=>{if(e.key==="Enter")postEcho()};
+$("statusChangeBtn").onclick=statusModal;
+$("statusNavBtn").onclick=statusModal;
+$("newsNavBtn").onclick=newsModal;
+$("newsTileBtn").onclick=newsModal;
+$("soundNavBtn").onclick=musicModal;
+$("settingsNavBtn").onclick=settingsModal;
+$("logoutNavBtn").onclick=logoutNest;
+$("overlay").onclick=e=>{if(e.target===$("overlay"))closeOverlay()};
+$("holoToggleBtn").onclick=e=>{const off=document.body.classList.toggle("flat");e.target.textContent=off?"OFF":"ON"};
+Array.from(document.querySelectorAll("[data-open]")).forEach(b=>b.onclick=()=>window.open(b.dataset.open,"_blank","noopener,noreferrer"));
+(function init(){showLogin();try{const u=localStorage.getItem("hollownest_demo_user");if(u){$("loginNameInput").value=u;}const s=localStorage.getItem("hollownest_status");if(s)$("statusViewEl").textContent=s;try{echoes=JSON.parse(localStorage.getItem("hollownest_echoes")||"[]")}catch(e){echoes=[]}}catch(e){}renderFriends();renderChat();renderEchoes();updateClock();setInterval(updateClock,30000);initBackend();
+const c=$("stars"),x=c.getContext("2d");let W,H,P=[];function rs(){W=c.width=c.offsetWidth;H=c.height=c.offsetHeight;P=Array.from({length:90},()=>({x:Math.random()*W,y:Math.random()*H,s:Math.random()*1.6+.4,v:Math.random()*.25+.05,o:Math.random()*.6+.2}))}rs();addEventListener("resize",rs);(function loop(){x.clearRect(0,0,W,H);for(const p of P){p.y-=p.v;if(p.y<-4){p.y=H+4;p.x=Math.random()*W}x.globalAlpha=p.o*(0.6+0.4*Math.sin(Date.now()/1000+p.x));x.fillStyle="#d5f7ff";x.fillRect(p.x,p.y,p.s,p.s)}x.globalAlpha=1;requestAnimationFrame(loop)})})();
+</script>
+<script>
+/* whisp-engine */
+
+(function(){
+var W=[
+{img:"https://user.uploads.dev/file/4f846cba8476c488f29b3e763cc81249.jpg",name:"Hornet",msg:"…little ghost. sit with me a while. the nest is quiet tonight."},
+{img:"https://user.uploads.dev/file/391b418c0181efb7be55bdc62f75510d.jpg",name:"Ghost",msg:"… … (a small nod, mask warm at the edges)"},
+{img:"https://user.uploads.dev/file/0e98d9ff40f57c247f96ff17d00753d5.jpg",name:"Quirrel",msg:"my, my… what a view from down here. rest beside me?"},
+{img:"https://user.uploads.dev/file/6823ea365796c457cd4f7201cb84d17d.jpg",name:"Grimm",msg:"a little bow, a little ember… the troupe keeps you warm."},
+{img:"https://user.uploads.dev/file/9f10201619e0380c3e3380f84df8e31f.jpg",name:"Hollow Knight",msg:"… … (a sealed hush, gentle, no pain in it tonight)"},
+{img:"https://user.uploads.dev/file/755ebcc60dce8baaef2ccc020a66f430.jpg",name:"Pure Vessel",msg:"…focus… breathe… see? the light holds back when we hum."},
+{img:"https://user.uploads.dev/file/7ba55a5d906e3527f3e24424c35f3056.jpg",name:"Mantis Lords",msg:"wanderer. your stance improves. honour to you."},
+{img:"https://user.uploads.dev/file/12156967f9d7b269d8f89fea44331351.jpg",name:"Soul Master",msg:"ah… another scholar of the soul? sip slowly."},
+{img:"https://user.uploads.dev/file/9af23a73d616766ecebf5b24fedca952.jpg",name:"Nosk",msg:"…come closer… only to share the warm dark. promise."},
+{img:"https://user.uploads.dev/file/8a5ce7853280c60b8b65f3b781c43cf3.jpg",name:"Radiance",msg:"…dream soft, little one… just this once, a kind dream…"}
+];
+var k=0,on=true;
+function spawn(){
+if(!on||!document.body)return;
+try{var ap=document.getElementById('app');if(ap&&ap.hidden)return;}catch(e){}
+if(true){
+var w=W[k%W.length];k++;
+var d=document.createElement("div");
+d.className="whisp"+(Math.random()>0.5?" flip":"");
+var side=Math.random()>0.5?"left":"right";
+d.innerHTML='<img src="'+w.img+'" alt=""><div class="wm"><b>'+w.name+'</b><br>'+w.msg+'</div>';
+d.style[side]="-240px";
+d.style.top=(8+Math.random()*68)+"%";
+document.body.appendChild(d);
+window.__whisps=(window.__whisps||0)+1;
+setTimeout(function(){d.style.transition="left 7s ease-in-out,right 7s ease-in-out,opacity 2.5s ease";d.style.opacity="1";d.style[side]="26px";},60);
+setTimeout(function(){d.style.transition="left 6s ease-in-out,right 6s ease-in-out,opacity 3s ease";d.style[side]="-240px";d.style.opacity="0";setTimeout(function(){d.remove();},6500);},11500);
+}
+setTimeout(spawn,9000);
+}
+try{
+var ctl=document.querySelector(".holoCtl");
+if(ctl){var b=document.createElement("button");b.textContent="WHISPERS ON";b.onclick=function(){on=!on;b.textContent=on?"WHISPERS ON":"WHISPERS OFF";};ctl.appendChild(b);var s=document.createElement("button");s.textContent="STOP";s.onclick=function(){on=false;b.textContent="WHISPERS OFF";var w=document.querySelectorAll(".whisp");for(var i2=0;i2<w.length;i2++){w[i2].remove();}};ctl.appendChild(s);}
+}catch(e){}
+setTimeout(spawn,3500);
+window.__whispSpawn=spawn;
+})();
+</script>
+
+</body></html>
