@@ -74,6 +74,10 @@ nav{display:grid;gap:8px}
 .msg small{display:block;color:#71858c;margin-top:3px;font-family:monospace;font-size:10px}
 .chatrow{display:flex;gap:8px;margin-top:10px}
 /* FIX: login gates first, titles get breathing room, no card overlap */
+#chatlogEl{scrollbar-width:thin;scrollbar-color:rgba(125,249,255,.35) transparent}
+#chatlogEl::-webkit-scrollbar{width:8px}
+#chatlogEl::-webkit-scrollbar-thumb{background:rgba(125,249,255,.25);border-radius:8px}
+#chatlogEl::-webkit-scrollbar-track{background:transparent}
 #login{z-index:50;background:rgba(4,7,11,.97)}
 #login .modal{margin:0}
 .chatCore h3{margin:4px 0 14px!important}
@@ -106,7 +110,7 @@ nav{display:grid;gap:8px}
 body.flat .holo:before,body.flat .flick,body.flat .holo:after{display:none}
 body.flat .gridfloor,body.flat .beam{opacity:.08}
 @media(max-width:1050px){body{overflow:auto}#app{grid-template-columns:180px minmax(0,1fr);height:auto;min-height:100vh}.left{grid-column:1;grid-row:1 / span 2}.right{grid-column:2;grid-row:1}.center{grid-column:2;grid-row:2}.tiles{grid-template-columns:repeat(2,1fr)}.friendlist{grid-template-columns:repeat(2,minmax(0,1fr))}.chatlog{min-height:260px;max-height:60vh}}
-@media(max-width:720px){body{overflow:auto}#app{height:auto;min-height:100vh;grid-template-columns:minmax(0,1fr)}.left{display:none}.right{grid-column:1;grid-row:1}.center{grid-column:1;grid-row:2}.friendlist{grid-template-columns:repeat(2,minmax(0,1fr))}.chatlog{min-height:340px;max-height:none}}
+@media(max-width:720px){body{overflow:auto}#app{height:auto;min-height:100vh;grid-template-columns:minmax(0,1fr)}.left{display:none}.right{grid-column:1;grid-row:1}.center{grid-column:1;grid-row:2}.friendlist{grid-template-columns:repeat(2,minmax(0,1fr))}.chatlog{min-height:300px;max-height:55vh}}
 </style>
 <style>
 
