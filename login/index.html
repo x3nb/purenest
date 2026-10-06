@@ -100,8 +100,8 @@ nav{display:grid;gap:8px}
 .dot{width:7px;height:7px;border-radius:50%;background:#77949b}.online .dot{background:#a8d8cf;box-shadow:0 0 8px #a8d8cf}
 .chatbox{margin-top:12px;border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;flex:none;height:min(42vh,420px)}
 .chatlog{flex:1;min-height:120px;max-height:none;overflow-y:scroll;overflow-x:hidden;display:grid;align-content:start;gap:12px;padding:4px 8px 4px 2px;scrollbar-gutter:stable}
-.msg{font-size:12.5px;line-height:1.6;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(125,249,255,.1);max-width:92%}
-.msg.me{margin-left:auto;background:rgba(150,220,225,.1)}
+.msg{font-size:12.5px;line-height:1.6;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(125,249,255,.1);max-width:92%;box-shadow:0 0 14px rgba(255,123,168,.13),0 0 34px rgba(255,123,168,.05)}
+.msg.me{margin-left:auto;background:rgba(150,220,225,.1);box-shadow:0 0 16px rgba(255,123,168,.2),0 0 40px rgba(255,123,168,.07)}
 .msg small{display:block;color:#71858c;margin-top:3px;font-family:monospace;font-size:10px}
 .chatrow{display:flex;gap:8px;margin-top:10px}
 /* icon rail: labels hidden, hover the icon for its name */
@@ -352,7 +352,7 @@ function statusModal(){openOverlay('<h3>MY STATUS</h3><p style="color:#82969d">W
 async function saveStatus(){const v=$("statusInputEl").value.trim();if(!v){closeOverlay();return}const who=myDisplayName();$("statusViewEl").textContent=v;try{localStorage.setItem("hollownest_status",v)}catch(e){}if(backendOn&&sb&&sbUser){try{await sb.from("profiles").update({status:v}).eq("id",sbUser.id)}catch(e){}try{const r=await sb.from("status_posts").insert({author_id:sbUser.id,body:v});if(r.error){showToast(r.error.message);}else{try{await loadEchoes()}catch(e){}}}catch(e){showToast("Status kept on this device.");echoes.push({t:v,w:who,mine:true,author:null});persistEchoes();renderEchoes();}}else{echoes.push({t:v,w:who,mine:true,author:null});persistEchoes();renderEchoes();}closeOverlay();showToast("Status posted.")}
 /* Owner role + Moderation Station */
 const OWNER_DEFAULT_KEY="hollow-founder";
-const BUILD_REV="2026-10-07-H";
+const BUILD_REV="2026-10-07-I";
 function ownerKey(){try{return localStorage.getItem("hollownest_owner_key")||OWNER_DEFAULT_KEY}catch(e){return OWNER_DEFAULT_KEY}}
 function ownerUids(){try{const a=JSON.parse(localStorage.getItem("hollownest_owner_uids")||"[]");const base=Array.isArray(a)?a.slice():[];try{const legacy=localStorage.getItem("hollownest_owner_uid");if(legacy&&base.indexOf(legacy)<0)base.push(legacy);}catch(e){}return base;}catch(e){return [];}}
 function addOwnerUid(id){try{if(!id)return;const a=ownerUids();if(a.indexOf(id)<0){a.push(id);localStorage.setItem("hollownest_owner_uids",JSON.stringify(a));}localStorage.removeItem("hollownest_owner_uid");}catch(e){}}
