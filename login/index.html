@@ -197,6 +197,15 @@ nav{display:grid;gap:8px}
 .duelmenu .quizopt span{color:#6fc3cf}
 .duelmenu .newsitem{background:rgba(0,14,20,.7);border:1px solid rgba(0,255,255,.25)}
 .duelmenu .modsec{color:#6fc3cf}
+#sparBtn.soulglow{animation:sparpulse 1.2s ease-in-out infinite;border-color:#0ff;color:#eafcff}
+@keyframes sparpulse{0%,100%{box-shadow:0 0 4px rgba(0,255,255,.3)}50%{box-shadow:0 0 16px #0ff,0 0 30px rgba(0,255,255,.6)}}
+.duelinvite{position:fixed;z-index:60;width:236px;max-width:80vw;padding:12px 12px 10px;border-radius:14px;background:rgba(4,10,14,.97);border:1px solid rgba(0,255,255,.55);box-shadow:0 0 20px rgba(0,255,255,.4);animation:nudgein .45s ease}
+.duelinvite b{display:block;font-size:12px;color:#eafcff;text-shadow:0 0 8px rgba(0,255,255,.7)}
+.duelinvite small{display:block;font-size:10px;color:#8fb8c0;font-family:monospace;margin-top:4px;line-height:1.5}
+.duelinvrow{display:flex;gap:8px;align-items:center;margin-top:8px}
+.duelinvite .primary{padding:6px 12px;font-size:12px}
+.duelinv-arrow{position:absolute;left:50%;bottom:-7px;width:12px;height:12px;background:rgba(4,10,14,.97);border-right:1px solid rgba(0,255,255,.55);border-bottom:1px solid rgba(0,255,255,.55);transform:translateX(-50%) rotate(45deg)}
+.duelinvite.loose .duelinv-arrow{display:none}
 .holoCtl{font-family:monospace;font-size:11px;color:var(--muted);display:flex;gap:8px;align-items:center}
 .holoCtl button{background:rgba(125,249,255,.08);border:1px solid var(--line);color:var(--holo);border-radius:8px;padding:4px 10px;font-family:monospace;font-size:11px}
 body.flat .holo:before,body.flat .flick,body.flat .holo:after{display:none}
@@ -300,7 +309,7 @@ async function initBackend(){const c=backendCfg();if(!c.url||!c.key||!window.sup
 
 function subscribeRealtime(){if(!sb)return;try{sb.channel("hollownest-live").on("postgres_changes",{event:"INSERT",schema:"public",table:"messages"},async payload=>{try{const r=payload.new;if(!r)return;const mine=isOwnHall(r.id,r.name);if(!mine){try{knock()}catch(e){}}try{await loadHall()}catch(e){}if(!mine&&!hallSelected){markUnreadHall(r.name,r.text);showToast("New message in the Nest Hall.");}else if(!mine){try{renderFriends()}catch(e){}}}catch(e){try{await loadHall()}catch(x){}}}).on("postgres_changes",{event:"INSERT",schema:"public",table:"direct_messages"},async payload=>{if(!payload.new)return;try{const d=payload.new;if(sbUser&&(d.sender_id===sbUser.id||d.recipient_id===sbUser.id)){if(d.sender_id!==sbUser.id){try{knock()}catch(e){}const sid=d.sender_id;const viewing=!hallSelected&&friends[selected]&&friends[selected].id===sid;try{await loadChat()}catch(e){}if(!viewing){markUnreadDM(sid,d.body);showToast("A vessel is reaching for you.");}}else{try{await loadChat()}catch(e){}}}}catch(e){try{await loadChat()}catch(x){}}}).on("postgres_changes",{event:"INSERT",schema:"public",table:"status_posts"},()=>loadEchoes()).subscribe()}catch(e){}}
 
-async function afterBackendLogin(silent){const n=dispName(sbUser);try{localStorage.setItem("hollownest_demo_user",n)}catch(e){}showApp();$("welcomeEl").textContent=(silent?"Welcome back, ":"Welcome, ")+n+".";await ensureProfile();await loadProfile();try{loadRole()}catch(e){}try{startPresence()}catch(e){}try{ensureDuelChannel()}catch(e){}try{startNestPoll()}catch(e){}await loadFriends();await loadChat();await loadEchoes();await loadQuizPlays();try{renderBoard()}catch(e){}try{renderTrophyBoard()}catch(e){}try{renderPlayBoard()}catch(e){}try{renderOwnerUI()}catch(e){}try{renderMembers()}catch(e){}if(!silent)showToast("Welcome to the nest.")}
+async function afterBackendLogin(silent){const n=dispName(sbUser);try{localStorage.setItem("hollownest_demo_user",n)}catch(e){}showApp();$("welcomeEl").textContent=(silent?"Welcome back, ":"Welcome, ")+n+".";await ensureProfile();await loadProfile();try{loadRole()}catch(e){}try{startPresence()}catch(e){}try{ensureDuelChannel()}catch(e){}try{scheduleDuelInvite()}catch(e){}try{startNestPoll()}catch(e){}await loadFriends();await loadChat();await loadEchoes();await loadQuizPlays();try{renderBoard()}catch(e){}try{renderTrophyBoard()}catch(e){}try{renderPlayBoard()}catch(e){}try{renderOwnerUI()}catch(e){}try{renderMembers()}catch(e){}if(!silent)showToast("Welcome to the nest.")}
 
 async function ensureProfile(){if(!sb||!sbUser)return;const meta=sbUser.user_metadata||{};const username=(sbUser.email?sbUser.email.split("@")[0]:"wanderer").replace(/[^a-zA-Z0-9_]/g,"").slice(0,40)||("wanderer_"+sbUser.id.slice(0,8));const display=meta.display_name||dispName(sbUser);try{const r=await sb.from("profiles").select("id").eq("id",sbUser.id).maybeSingle();if(!r.data)await sb.from("profiles").insert({id:sbUser.id,display_name:display})}catch(e){}}
 
@@ -395,7 +404,7 @@ function statusModal(){openOverlay('<h3>MY STATUS</h3><p style="color:#82969d">W
 async function saveStatus(){const v=$("statusInputEl").value.trim();if(!v){closeOverlay();return}const who=myDisplayName();$("statusViewEl").textContent=v;try{localStorage.setItem("hollownest_status",v)}catch(e){}if(backendOn&&sb&&sbUser){try{await sb.from("profiles").update({status:v}).eq("id",sbUser.id)}catch(e){}try{const r=await sb.from("status_posts").insert({author_id:sbUser.id,body:v});if(r.error){showToast(r.error.message);}else{try{await loadEchoes()}catch(e){}}}catch(e){showToast("Status kept on this device.");echoes.push({t:v,w:who,mine:true,author:null});persistEchoes();renderEchoes();}}else{echoes.push({t:v,w:who,mine:true,author:null});persistEchoes();renderEchoes();}closeOverlay();showToast("Status posted.")}
 /* Owner role + Moderation Station */
 const OWNER_DEFAULT_KEY="hollow-founder";
-const BUILD_REV="2026-10-07-U";
+const BUILD_REV="2026-10-07-V";
 function ownerKey(){try{return localStorage.getItem("hollownest_owner_key")||OWNER_DEFAULT_KEY}catch(e){return OWNER_DEFAULT_KEY}}
 function ownerUids(){try{const a=JSON.parse(localStorage.getItem("hollownest_owner_uids")||"[]");const base=Array.isArray(a)?a.slice():[];try{const legacy=localStorage.getItem("hollownest_owner_uid");if(legacy&&base.indexOf(legacy)<0)base.push(legacy);}catch(e){}return base;}catch(e){return [];}}
 function addOwnerUid(id){try{if(!id)return;const a=ownerUids();if(a.indexOf(id)<0){a.push(id);localStorage.setItem("hollownest_owner_uids",JSON.stringify(a));}localStorage.removeItem("hollownest_owner_uid");}catch(e){}}
@@ -609,7 +618,7 @@ try{
 try{if(presenceChannel)await sb.removeChannel(presenceChannel);}catch(e){}
 presenceChannel=sb.channel("nest-presence",{config:{presence:{key:sbUser.id}}});
 presenceChannel.on("presence",{event:"sync"},function(){readPresenceState();renderMembers();try{renderFriends();}catch(e){}});
-presenceChannel.on("presence",{event:"join"},function(){readPresenceState();renderMembers();try{renderFriends();}catch(e){}});
+presenceChannel.on("presence",{event:"join"},function(){readPresenceState();renderMembers();try{renderFriends();}catch(e){}try{duelCheckArrivals();}catch(e){}});
 presenceChannel.on("presence",{event:"leave"},function(){readPresenceState();renderMembers();try{renderFriends();}catch(e){}});
 presenceChannel.on("broadcast",{event:"typing"},function(p){try{const d=p.payload||{};if(!sbUser||d.from===sbUser.id)return;typingState={name:String(d.name||"Someone").slice(0,24),to:d.to,at:Date.now()};renderTyping();}catch(e){}});
 presenceChannel.on("broadcast",{event:"typing-stop"},function(p){try{const d=p.payload||{};if(typingState&&d.from&&typingState.to===d.to){typingState=null;}renderTyping();}catch(e){}});
@@ -711,7 +720,41 @@ function botTakeTurn(){if(!duelState||duelState.over||!duelState.bot||duelState.
 function forfeitDuel(){if(!duelState||duelState.over){try{closeOverlay();}catch(e){}duelState=null;return;}if(!duelState.bot)duelSend("forfeit",{duelId:duelState.id,to:duelState.oppId,winner:duelState.oppId});duelState.over=true;duelState.winner="opp";duelState.log.push(duelState.myName+" lowers their nail — "+duelState.oppName+" takes the bout.");renderDuel();try{duelSfx("lose");}catch(e){}if(duelState.bot)saveDuelTrophy(duelState.oppName,"",duelState.myName,duelState.moves,true);}
 function finishDuel(winner,announce){if(!duelState||duelState.over&&duelState.posted)return;duelState.over=true;duelState.winner=winner;var iWin=winner==="me";if(iWin)duelState.log.push(duelState.myName+" breaks "+duelState.oppName+" mask — the bout is theirs.");else duelState.log.push(duelState.oppName+" breaks "+duelState.myName+" mask — the bout is theirs.");renderDuel();try{duelSfx(iWin?"win":"lose");}catch(e){}try{if(typeof knock!=="undefined")knock();}catch(e){}if(duelState.bot){saveDuelTrophy(iWin?duelState.myName:duelState.oppName,iWin?duelState.myAvatar:"",iWin?duelState.oppName:duelState.myName,duelState.moves,false);return;}if(iWin&&announce){duelSend("end",{duelId:duelState.id,to:duelState.oppId,winner:duelState.meId,winnerName:duelState.myName,turns:duelState.moves});saveDuelTrophy(duelState.myName,duelState.myAvatar,duelState.oppName,duelState.moves,false);}duelState.posted=true;}
 function renderDuel(){if(!duelState)return;var st=duelState;var myTurn=!st.over&&st.turn==="me";var banner=st.over?((st.winner==="me"?st.myName:st.oppName)+" breaks the other mask — the bout is theirs."):(st.turn==="me"?("Your strike, "+st.myName+" — choose."):(" Hold — "+st.oppName+" is moving…"));var dis=myTurn?"":"disabled";var h='<h3 class="dueltitle">NAIL-SP ● '+escapeHtml(st.myName)+' vs '+escapeHtml(st.oppName)+'</h3><div class="dueltop"><div class="duelside"><div style="display:flex;gap:10px;align-items:center">'+duelAvHtml(st.myAvatar,st.myName,54)+'<div><div class="duelname">'+escapeHtml(st.myName)+(st.bot&&st.oppId==="shade"?"":'')+'</div><div class="duelmasks">'+duelHearts(st.myHP)+'</div></div></div>'+(st.myDodge?'<div class="dueltag">dodge ready</div>':"")+'</div><div class="duelvs">⚔<br><span>'+st.moves+' strikes</span></div><div class="duelside right"><div style="display:flex;gap:10px;align-items:center;justify-content:flex-end"><div><div class="duelname">'+escapeHtml(st.oppName)+'</div><div class="duelmasks">'+duelHearts(st.oppHP)+'</div></div>'+duelAvHtml(st.oppAvatar,st.oppName,54)+'</div>'+(st.oppDodge?'<div class="dueltag">dodge ready</div>':"")+'</div></div><div class="duelturn'+(myTurn?"":" opp")+'">'+escapeHtml(banner)+'</div><div class="duelmoves"><button class="quizopt" data-mv="slash" '+dis+'><b>Slash</b><span>2 damage · clean and honest</span></button><button class="quizopt" data-mv="dash" '+dis+'><b>Dash</b><span>dodge the next slash</span></button><button class="quizopt" data-mv="focus" '+dis+'><b>Focus</b><span>mend 2 masks</span></button></div><div class="duellog">'+st.log.slice(-8).map(function(l){return '<div>'+escapeHtml(l)+'</div>';}).join("")+'</div><br><div style="display:flex;gap:8px;flex-wrap:wrap">'+(st.over?'<button class="primary" id="duelReturnBtn">Return to HollowNest</button>':'<button class="link" id="duelYieldBtn">Lower your nail (yield)</button>')+'</div>';openOverlay(h);try{Array.from(document.querySelectorAll("[data-mv]")).forEach(function(b){b.onclick=function(){if(b.disabled)return;doDuelMove(b.dataset.mv);};});}catch(e){}try{var y=document.getElementById("duelYieldBtn");if(y)y.onclick=forfeitDuel;}catch(e){}try{var r=document.getElementById("duelReturnBtn");if(r)r.onclick=function(){duelState=null;closeOverlay();};}catch(e){}}
-async function saveDuelTrophy(winnerName,winnerImg,loserName,turns,quietBoard){var n=String(winnerName||"Wanderer").slice(0,24);try{if(typeof loadTrophies!=="undefined"){var arr=loadTrophies();arr.push({duel:1,n:n,img:winnerImg||"",vs:String(loserName||"a rival").slice(0,24),t:turns||0,d:Date.now()});arr=arr.slice(-20);try{localStorage.setItem("hollownest_quiz_board",JSON.stringify(arr));}catch(e){}}if(typeof renderTrophyBoard!=="undefined")renderTrophyBoard();}catch(e){}var line="⚔ "+n+" broke "+(loserName||"a rival")+" mask in a nail-spar ("+(turns||0)+" strikes)!";if(typeof backendOn!=="undefined"&&backendOn&&typeof sb!=="undefined"&&sb&&typeof sbUser!=="undefined"&&sbUser){try{await sb.from("status_posts").insert({author_id:sbUser.id,body:line});if(typeof loadEchoes!=="undefined")await loadEchoes();}catch(e){}}else if(!quietBoard){try{echoes.push({t:line,w:n,mine:true,author:null});try{localStorage.setItem("hollownest_echoes",JSON.stringify(echoes));}catch(e){}if(typeof renderEchoes!=="undefined")renderEchoes();}catch(e){}if(!quietBoard)showToast("⚔ "+n+" crowned on the score board!");}}
+async function saveDuelTrophy(winnerName,winnerImg,loserName,turns,quietBoard){var n=String(winnerName||"Wanderer").slice(0,24);try{if(typeof loadTrophies!=="undefined"){var arr=loadTrophies();arr.push({duel:1,n:n,img:winnerImg||"",vs:String(loserName||"a rival").slice(0,24),t:turns||0,d:Date.now()});arr=arr.slice(-20);try{localStorage.setItem("hollownest_quiz_board",JSON.stringify(arr));}catch(e){}}if(typeof renderTrophyBoard!=="undefined")renderTrophyBoard();}catch(e){}try{var dp=Number(localStorage.getItem("hollownest_duels_played")||0);localStorage.setItem("hollownest_duels_played",String(dp+1));}catch(e){}var line="⚔ "+n+" broke "+(loserName||"a rival")+" mask in a nail-spar ("+(turns||0)+" strikes)!";if(typeof backendOn!=="undefined"&&backendOn&&typeof sb!=="undefined"&&sb&&typeof sbUser!=="undefined"&&sbUser){try{await sb.from("status_posts").insert({author_id:sbUser.id,body:line});if(typeof loadEchoes!=="undefined")await loadEchoes();}catch(e){}}else if(!quietBoard){try{echoes.push({t:line,w:n,mine:true,author:null});try{localStorage.setItem("hollownest_echoes",JSON.stringify(echoes));}catch(e){}if(typeof renderEchoes!=="undefined")renderEchoes();}catch(e){}if(!quietBoard)showToast("⚔ "+n+" crowned on the score board!");}}
+/* duel invitations (glow + invite bubble) */
+var duelInviteTimer=null;
+function duelsPlayed(){try{return Number(localStorage.getItem("hollownest_duels_played")||0);}catch(e){return 0;}}
+function lastInviteAt(){try{return Number(localStorage.getItem("hollownest_duel_invite_at")||0);}catch(e){return 0;}}
+function markInvited(){try{localStorage.setItem("hollownest_duel_invite_at",String(Date.now()));}catch(e){}}
+function glowSpar(on){try{var b=document.getElementById("sparBtn");if(!b)return;b.classList.toggle("soulglow",!!on);}catch(e){}}
+function closeDuelInvite(){try{var d=document.getElementById("duelInviteEl");if(d)d.remove();}catch(e){}glowSpar(false);try{if(duelInviteTimer){clearTimeout(duelInviteTimer);duelInviteTimer=null;}}catch(e){}}
+function showDuelInvite(who){try{
+if(typeof duelState!=="undefined"&&duelState&&!duelState.over)return false;
+if(document.getElementById("duelInviteEl"))return false;
+closeDuelInvite();
+var nm=who?String(who).slice(0,24):"";
+var d=document.createElement("div");d.id="duelInviteEl";d.className="duelinvite";
+d.innerHTML='<b>'+(nm?escapeHtml(nm)+' is in the nest — cross nails?':'The shade stirs — cross nails?')+'</b><small>'+(nm?'First to break the other mask wins. The nest remembers.':'A quick spar with the hollow shade. No lantern needed.')+'</small><div class="duelinvrow"><button class="primary" id="duelInvGo">Spar</button><button class="link" id="duelInvLater">later</button></div><i class="duelinv-arrow"></i>';
+document.body.appendChild(d);
+var placed=false;
+try{var b=document.getElementById("sparBtn");var r=b.getBoundingClientRect();if(r&&r.width>0){var x=Math.max(8,Math.min(window.innerWidth-250,r.right-240));d.style.left=x+"px";d.style.top=Math.max(8,r.top-d.offsetHeight-14)+"px";placed=true;}}catch(e){}
+if(!placed){d.classList.add("loose");d.style.right="14px";d.style.bottom="14px";}
+glowSpar(true);markInvited();
+try{document.getElementById("duelInvGo").onclick=function(){closeDuelInvite();try{openSparModal();}catch(e){}};}catch(e){}
+try{document.getElementById("duelInvLater").onclick=function(){closeDuelInvite();showToast("The shade waits.");};}catch(e){}
+try{if(typeof chime!=="undefined")chime();}catch(e){}
+try{if(duelInviteTimer)clearTimeout(duelInviteTimer);}catch(e){}
+duelInviteTimer=setTimeout(function(){closeDuelInvite();},25000);
+return true;
+}catch(e){return false;}}
+function scheduleDuelInvite(){try{if(duelsPlayed()>0)return;if(Date.now()-lastInviteAt()<3600000)return;setTimeout(function(){try{if(typeof backendOn!=="undefined"&&backendOn)showDuelInvite(null);}catch(e){}},25000);}catch(e){}}
+var __duelSeenIds=null;
+function duelCheckArrivals(){try{
+var ids={};try{Object.keys(liveMembers||{}).forEach(function(k){ids[k]=1;});}catch(e){}
+var myId="";try{myId=myDuelId();}catch(e){}
+if(__duelSeenIds){for(var k in ids){if(!ids.hasOwnProperty(k))continue;if(k===myId)continue;if(!__duelSeenIds[k]){var nm="";try{nm=(liveMembers[k]&&liveMembers[k].n)||"A vessel";}catch(e){}if(Date.now()-lastInviteAt()>1800000){showDuelInvite(nm);}break;}}}
+__duelSeenIds=ids;
+}catch(e){}}
 window.__duel={get:function(){return duelState;},bot:function(){startBotDuel();},move:function(m){doDuelMove(m);},spar:function(){openSparModal();},pkt:function(d){onDuelPacket(d);}};
 
 function newsModal(){openOverlay('<h3>ANIMATION NEWS</h3><p style="color:#82969d">Tales from the wider Hollow Knight community.</p><div class="newsitem"><b>More tales surface soon</b><small>The nest is listening.</small></div><br><button class="primary" id="closeOvBtn">Return to HollowNest</button>');$("closeOvBtn").onclick=closeOverlay}
@@ -800,5 +843,10 @@ setTimeout(spawn,3500);
 window.__whispSpawn=spawn;
 })();
 </script>
+
+
+
+
+
 
 </body></html>
